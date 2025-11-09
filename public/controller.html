@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overlay Controller</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+  <div class="controller">
+    <h1>Broadcast Graphics Controller</h1>
+    <p>
+      Use this panel to update the data that feeds the overlay graphics.
+      Overlays refresh automatically every two seconds.
+    </p>
+
+    <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <a href="/singlebar" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Last Rally Overlay</a>
+      <a href="/doublebar" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Metric Overlay</a>
+    </div>
+
+    <section class="toggle-section">
+      <h2>Overlay Visibility</h2>
+      <div class="toggle-row" id="visibilityControls">
+        <button type="button" class="toggle-button" data-overlay="single" data-visible="true">Single In</button>
+        <button type="button" class="toggle-button" data-overlay="single" data-visible="false">Single Out</button>
+        <button type="button" class="toggle-button" data-overlay="double" data-visible="true">Double In</button>
+        <button type="button" class="toggle-button" data-overlay="double" data-visible="false">Double Out</button>
+      </div>
+    </section>
+
+    <section class="toggle-section">
+      <h2>Quick Animations</h2>
+      <div class="toggle-row" id="quickControls">
+        <button type="button" class="toggle-button action-button" data-type="rally" data-visible="true">Rally In</button>
+        <button type="button" class="toggle-button action-button" data-type="rally" data-visible="false">Rally Out</button>
+        <button type="button" class="toggle-button action-button" data-type="serve_success" data-visible="true">Serve Success In</button>
+        <button type="button" class="toggle-button action-button" data-type="serve_success" data-visible="false">Serve Success Out</button>
+        <button type="button" class="toggle-button action-button" data-type="forehand_wins" data-visible="true">Forehand In</button>
+        <button type="button" class="toggle-button action-button" data-type="forehand_wins" data-visible="false">Forehand Out</button>
+        <button type="button" class="toggle-button action-button" data-type="backhand_wins" data-visible="true">Backhand In</button>
+        <button type="button" class="toggle-button action-button" data-type="backhand_wins" data-visible="false">Backhand Out</button>
+      </div>
+    </section>
+
+    <form id="stateForm">
+      <div class="form-grid">
+        <div>
+          <label for="set_label">Set Label</label>
+          <input type="text" id="set_label" name="set_label" placeholder="Set 1" />
+        </div>
+        <div>
+          <label for="current_game">Current Game</label>
+          <input type="number" id="current_game" name="current_game" min="0" />
+        </div>
+        <div>
+          <label for="rally_count">Rally Count</label>
+          <input type="number" id="rally_count" name="rally_count" min="0" />
+        </div>
+        <div>
+          <label for="player_a_name">Player A Name</label>
+          <input type="text" id="player_a_name" name="player_a_name" />
+        </div>
+        <div>
+          <label for="player_b_name">Player B Name</label>
+          <input type="text" id="player_b_name" name="player_b_name" />
+        </div>
+        <div>
+          <label for="player_a_serve_success">Player A Serve Success (%)</label>
+          <input type="number" id="player_a_serve_success" name="player_a_serve_success" min="0" max="100" />
+        </div>
+        <div>
+          <label for="player_b_serve_success">Player B Serve Success (%)</label>
+          <input type="number" id="player_b_serve_success" name="player_b_serve_success" min="0" max="100" />
+        </div>
+        <div>
+          <label for="player_a_forehand_wins">Player A Forehand Wins (%)</label>
+          <input type="number" id="player_a_forehand_wins" name="player_a_forehand_wins" min="0" max="100" />
+        </div>
+        <div>
+          <label for="player_b_forehand_wins">Player B Forehand Wins (%)</label>
+          <input type="number" id="player_b_forehand_wins" name="player_b_forehand_wins" min="0" max="100" />
+        </div>
+        <div>
+          <label for="player_a_backhand_wins">Player A Backhand Wins (%)</label>
+          <input type="number" id="player_a_backhand_wins" name="player_a_backhand_wins" min="0" max="100" />
+        </div>
+        <div>
+          <label for="player_b_backhand_wins">Player B Backhand Wins (%)</label>
+          <input type="number" id="player_b_backhand_wins" name="player_b_backhand_wins" min="0" max="100" />
+        </div>
+      </div>
+      <button type="submit" class="primary">Push Update</button>
+    </form>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const numericFields = [
+      'current_game',
+      'rally_count',
+      'player_a_serve_success',
+      'player_b_serve_success',
+      'player_a_forehand_wins',
+      'player_b_forehand_wins',
+      'player_a_backhand_wins',
+      'player_b_backhand_wins'
+    ];
+
+    const numericFieldSet = new Set(numericFields);
+    const METRIC_KEYS = ['serve_success', 'forehand_wins', 'backhand_wins'];
+
+    const form = document.getElementById('stateForm');
+    const statusEl = document.getElementById('status');
+    const visibilityButtons = document.querySelectorAll('#visibilityControls .toggle-button');
+    const actionButtons = document.querySelectorAll('.action-button');
+
+    const visibilityState = {
+      single: true,
+      double: true
+    };
+
+    let metricState = 'serve_success';
+    let isSyncing = false;
+
+    async function loadState(options = {}) {
+      const { force = false, silent = false } = options;
+      if (isSyncing && !force) {
+        return false;
+      }
+
+      isSyncing = true;
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch state');
+        }
+        const data = await response.json();
+
+        Object.entries(data).forEach(([key, value]) => {
+          const input = form.elements.namedItem(key);
+          if (!input || document.activeElement === input) {
+            return;
+          }
+
+          if (numericFieldSet.has(key)) {
+            input.value = value ?? '';
+          } else {
+            input.value = value || '';
+          }
+        });
+
+        visibilityState.single = data.singlebar_visible !== false;
+        visibilityState.double = data.doublebar_visible !== false;
+        metricState = data.doublebar_metric && METRIC_KEYS.includes(data.doublebar_metric)
+          ? data.doublebar_metric
+          : 'serve_success';
+
+        updateVisibilityButtons();
+        updateActionButtons();
+
+        return true;
+      } catch (error) {
+        console.error(error);
+        if (!silent) {
+          showStatus('Unable to load state. Please refresh.', true);
+        }
+        return false;
+      } finally {
+        isSyncing = false;
+      }
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = {};
+
+      Array.from(form.elements).forEach((element) => {
+        if (!element.name) {
+          return;
+        }
+
+        if (numericFieldSet.has(element.name)) {
+          const value = element.value.trim();
+          payload[element.name] = value === '' ? null : Number(value);
+        } else {
+          payload[element.name] = element.value.trim();
+        }
+      });
+
+      const succeeded = await pushUpdate(payload, 'Update sent to overlays.');
+      if (succeeded) {
+        await loadState({ force: true, silent: true });
+      }
+    });
+
+    visibilityButtons.forEach((button) => {
+      button.addEventListener('click', async () => {
+        const overlay = button.getAttribute('data-overlay');
+        const visibleAttr = button.getAttribute('data-visible');
+        if (!overlay || (overlay !== 'single' && overlay !== 'double')) {
+          return;
+        }
+        const isVisible = visibleAttr === 'true';
+        if (visibilityState[overlay] === isVisible) {
+          return;
+        }
+        const payload = overlay === 'single'
+          ? { singlebar_visible: isVisible }
+          : { doublebar_visible: isVisible };
+
+        visibilityState[overlay] = isVisible;
+        updateVisibilityButtons();
+        const succeeded = await pushUpdate(
+          payload,
+          `${overlay === 'single' ? 'Single' : 'Double'} overlay ${isVisible ? 'animated in' : 'taken out'}.`
+        );
+
+        if (!succeeded) {
+          visibilityState[overlay] = !isVisible;
+          updateVisibilityButtons();
+        }
+        updateActionButtons();
+
+        if (succeeded) {
+          await loadState({ force: true, silent: true });
+        }
+      });
+    });
+
+    actionButtons.forEach((button) => {
+      button.addEventListener('click', async () => {
+        const type = button.getAttribute('data-type');
+        const isVisible = button.getAttribute('data-visible') === 'true';
+
+        if (type === 'rally') {
+          if (visibilityState.single === isVisible) {
+            return;
+          }
+          visibilityState.single = isVisible;
+          updateVisibilityButtons();
+          updateActionButtons();
+          const succeeded = await pushUpdate(
+            { singlebar_visible: isVisible },
+            `Rally overlay ${isVisible ? 'animated in' : 'taken out'}.`
+          );
+          if (!succeeded) {
+            visibilityState.single = !isVisible;
+            updateVisibilityButtons();
+            updateActionButtons();
+          } else {
+            await loadState({ force: true, silent: true });
+          }
+          return;
+        }
+
+        if (!METRIC_KEYS.includes(type)) {
+          return;
+        }
+
+        if (isVisible) {
+          if (visibilityState.double && metricState === type) {
+            return;
+          }
+          const previousMetric = metricState;
+          const previousVisibility = visibilityState.double;
+          metricState = type;
+          visibilityState.double = true;
+          updateVisibilityButtons();
+          updateActionButtons();
+          const succeeded = await pushUpdate(
+            { doublebar_visible: true, doublebar_metric: type },
+            `${formatMetricLabel(type)} overlay animated in.`
+          );
+          if (!succeeded) {
+            metricState = previousMetric;
+            visibilityState.double = previousVisibility;
+            updateVisibilityButtons();
+            updateActionButtons();
+          } else {
+            await loadState({ force: true, silent: true });
+          }
+        } else {
+          if (!visibilityState.double) {
+            return;
+          }
+          const previousVisibility = visibilityState.double;
+          visibilityState.double = false;
+          updateVisibilityButtons();
+          updateActionButtons();
+          const succeeded = await pushUpdate(
+            { doublebar_visible: false },
+            `${formatMetricLabel(metricState)} overlay taken out.`
+          );
+          if (!succeeded) {
+            visibilityState.double = previousVisibility;
+            updateVisibilityButtons();
+            updateActionButtons();
+          } else {
+            await loadState({ force: true, silent: true });
+          }
+        }
+      });
+    });
+
+    function updateVisibilityButtons() {
+      visibilityButtons.forEach((button) => {
+        const overlay = button.getAttribute('data-overlay');
+        const visibleAttr = button.getAttribute('data-visible');
+        const isVisible = visibleAttr === 'true';
+        const active = overlay && visibilityState[overlay] === isVisible;
+        button.classList.toggle('active', active);
+      });
+    }
+
+    function updateActionButtons() {
+      actionButtons.forEach((button) => {
+        const type = button.getAttribute('data-type');
+        const isVisible = button.getAttribute('data-visible') === 'true';
+        let active = false;
+
+        if (type === 'rally') {
+          active = visibilityState.single === isVisible;
+        } else if (METRIC_KEYS.includes(type)) {
+          if (isVisible) {
+            active = visibilityState.double && metricState === type;
+          } else {
+            active = !visibilityState.double && metricState === type;
+          }
+        }
+
+        button.classList.toggle('active', active);
+      });
+    }
+
+    async function pushUpdate(payload, successMessage) {
+      try {
+        const response = await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error('Request failed');
+        }
+
+        showStatus(successMessage || 'Update sent.');
+        return true;
+      } catch (error) {
+        console.error(error);
+        showStatus('Failed to push update.', true);
+        return false;
+      }
+    }
+
+    function formatMetricLabel(metricKey) {
+      switch (metricKey) {
+        case 'forehand_wins':
+          return 'Forehand';
+        case 'backhand_wins':
+          return 'Backhand';
+        case 'serve_success':
+        default:
+          return 'Serve Success';
+      }
+    }
+
+    function showStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? '#ff6b6b' : 'var(--text-secondary)';
+      if (!message) {
+        return;
+      }
+      setTimeout(() => {
+        statusEl.textContent = '';
+      }, 3000);
+    }
+
+    loadState({ force: true });
+    setInterval(() => {
+      loadState({ silent: true });
+    }, 1000);
+  </script>
+</body>
+
+</html>
+

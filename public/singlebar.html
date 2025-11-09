@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="overlay-page">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last Rally Overlay</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="overlay overlay-rally">
+  <div class="rally-chip board" id="singleBoard">
+    <div class="rally-chip__title">Shots in Last Rally</div>
+    <div class="rally-chip__value" id="rallyValue">0</div>
+  </div>
+
+  <script>
+    const board = document.getElementById('singleBoard');
+    const rallyValueEl = document.getElementById('rallyValue');
+
+    let lastRallyValue;
+    let lastVisibility;
+
+    async function fetchState() {
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch state');
+        }
+        const data = await response.json();
+        render(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function render(data) {
+      const isVisible = data.singlebar_visible !== false;
+
+      if (isVisible !== lastVisibility) {
+        board.classList.toggle('is-hidden', !isVisible);
+        lastVisibility = isVisible;
+        if (isVisible) {
+          triggerAnimation();
+        }
+      }
+
+      const rallyCount = Number(data.rally_count) || 0;
+      if (rallyCount !== lastRallyValue) {
+        animateNumber(rallyValueEl, lastRallyValue ?? 0, rallyCount);
+        lastRallyValue = rallyCount;
+        if (lastVisibility !== false) {
+          triggerAnimation();
+        }
+      }
+    }
+
+    function triggerAnimation() {
+      board.classList.remove('animate');
+      void board.offsetWidth;
+      board.classList.add('animate');
+    }
+
+    function animateNumber(el, fromValue, toValue) {
+      const start = Number.isFinite(fromValue) ? fromValue : 0;
+      const end = Number.isFinite(toValue) ? toValue : 0;
+      const duration = 500;
+      const startTime = performance.now();
+
+      function frame(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + (end - start) * eased);
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    fetchState();
+    setInterval(fetchState, 300);
+  </script>
+</body>
+
+</html>
+

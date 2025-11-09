@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="overlay-page">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Double Metric Overlay</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="overlay overlay-metrics">
+  <div class="metrics-card board" id="doubleBoard">
+    <div class="metrics-card__header" id="metricTitle">SERVE SUCCESS SO FAR</div>
+
+    <div class="metrics-card__row">
+      <div class="metrics-card__label metrics-card__label--player-a" id="playerAName">Player A</div>
+      <div class="metrics-card__value metrics-card__value--player-a" id="playerAValue">0</div>
+    </div>
+    <div class="metrics-card__row">
+      <div class="metrics-card__label metrics-card__label--player-b" id="playerBName">Player B</div>
+      <div class="metrics-card__value metrics-card__value--player-b" id="playerBValue">0</div>
+    </div>
+  </div>
+
+  <script>
+    const METRICS = {
+      serve_success: {
+        title: 'Serve Success',
+        keyA: 'player_a_serve_success',
+        keyB: 'player_b_serve_success'
+      },
+      forehand_wins: {
+        title: 'Forehand Wins',
+        keyA: 'player_a_forehand_wins',
+        keyB: 'player_b_forehand_wins'
+      },
+      backhand_wins: {
+        title: 'Backhand Wins',
+        keyA: 'player_a_backhand_wins',
+        keyB: 'player_b_backhand_wins'
+      }
+    };
+
+    const board = document.getElementById('doubleBoard');
+    const metricTitle = document.getElementById('metricTitle');
+    const playerANameEl = document.getElementById('playerAName');
+    const playerBNameEl = document.getElementById('playerBName');
+    const playerAValueEl = document.getElementById('playerAValue');
+    const playerBValueEl = document.getElementById('playerBValue');
+
+    let currentMetricKey = 'serve_success';
+    let lastValues = { keyA: undefined, keyB: undefined, names: ['', ''] };
+    let lastVisibility;
+    let lastMetricTitle;
+
+    async function fetchState() {
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch state');
+        }
+        const data = await response.json();
+        render(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function render(data) {
+      const metricKey = METRICS[data.doublebar_metric] ? data.doublebar_metric : 'serve_success';
+      if (metricKey !== currentMetricKey) {
+        currentMetricKey = metricKey;
+        lastValues = { keyA: undefined, keyB: undefined, names: lastValues.names };
+        lastMetricTitle = undefined;
+      }
+
+      const metric = METRICS[currentMetricKey];
+      const isVisible = data.doublebar_visible !== false;
+
+      if (isVisible !== lastVisibility) {
+        board.classList.toggle('is-hidden', !isVisible);
+        if (isVisible) {
+          lastValues = { keyA: undefined, keyB: undefined, names: ['', ''] };
+          triggerAnimation();
+        }
+        lastVisibility = isVisible;
+      }
+
+      const headerText = `${metric.title} SO FAR`.toUpperCase();
+      if (headerText !== lastMetricTitle) {
+        metricTitle.textContent = headerText;
+        lastMetricTitle = headerText;
+      }
+
+      const nameA = data.player_a_name || 'Player A';
+      const nameB = data.player_b_name || 'Player B';
+
+      const valueA = parseNumeric(data[metric.keyA]);
+      const valueB = parseNumeric(data[metric.keyB]);
+
+      if (lastValues.names[0] !== nameA) {
+        playerANameEl.textContent = nameA;
+      }
+
+      if (lastValues.names[1] !== nameB) {
+        playerBNameEl.textContent = nameB;
+      }
+
+      if (lastValues.keyA !== valueA) {
+        animateNumber(playerAValueEl, lastValues.keyA ?? 0, valueA);
+      }
+
+      if (lastValues.keyB !== valueB) {
+        animateNumber(playerBValueEl, lastValues.keyB ?? 0, valueB);
+      }
+
+      const changed =
+        lastValues.keyA !== valueA ||
+        lastValues.keyB !== valueB ||
+        lastValues.names[0] !== nameA ||
+        lastValues.names[1] !== nameB;
+
+      if (changed && lastVisibility !== false) {
+        triggerAnimation();
+      }
+
+      playerAValueEl.textContent = Math.round(valueA);
+      playerBValueEl.textContent = Math.round(valueB);
+
+      lastValues = { keyA: valueA, keyB: valueB, names: [nameA, nameB] };
+    }
+
+    function parseNumeric(value) {
+      const num = Number(value);
+      return Number.isFinite(num) ? Math.round(num) : 0;
+    }
+
+    function animateNumber(el, fromValue, toValue) {
+      const start = Number.isFinite(fromValue) ? fromValue : 0;
+      const end = Number.isFinite(toValue) ? toValue : 0;
+      const duration = 600;
+      const startTime = performance.now();
+
+      function frame(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutCubic(progress);
+        const current = Math.round(start + (end - start) * eased);
+        el.textContent = current;
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function triggerAnimation() {
+      board.classList.remove('animate');
+      void board.offsetWidth;
+      board.classList.add('animate');
+    }
+
+    fetchState();
+    setInterval(fetchState, 300);
+  </script>
+</body>
+
+</html>
+
