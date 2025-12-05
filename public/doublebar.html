@@ -10,13 +10,13 @@
 
 <body class="overlay overlay-metrics">
   <div class="metrics-card board" id="doubleBoard" data-overlay="doublebar">
-    <div class="metrics-card__header" id="metricTitle">TOTAL POINTS WON SO FAR</div>
+    <div class="metrics-card__header" id="metricTitle">TOTAL POINTS WON</div>
 
-    <div class="metrics-card__row">
+    <div class="metrics-card__row" id="playerARow">
       <div class="metrics-card__label metrics-card__label--player-a" id="playerAName">Player A</div>
       <div class="metrics-card__value metrics-card__value--player-a" id="playerAValue">0</div>
     </div>
-    <div class="metrics-card__row">
+    <div class="metrics-card__row" id="playerBRow">
       <div class="metrics-card__label metrics-card__label--player-b" id="playerBName">Player B</div>
       <div class="metrics-card__value metrics-card__value--player-b" id="playerBValue">0</div>
     </div>
@@ -24,20 +24,20 @@
 
   <script>
     const METRICS = {
-      total_points_won: {
-        title: 'Total Points Won',
-        keyA: 'player_a_total_points_won',
-        keyB: 'player_b_total_points_won'
-      },
-      total_serves_done: {
-        title: 'Total Serves Done',
-        keyA: 'player_a_total_serves_done',
-        keyB: 'player_b_total_serves_done'
-      },
       points_on_serve: {
         title: 'Points on Serve',
         keyA: 'player_a_points_on_serve',
         keyB: 'player_b_points_on_serve'
+      },
+      forced_errors: {
+        title: 'Forced Errors',
+        keyA: 'player_a_forced_errors',
+        keyB: 'player_b_forced_errors'
+      },
+      unforced_errors: {
+        title: 'Unforced Errors',
+        keyA: 'player_a_unforced_errors',
+        keyB: 'player_b_unforced_errors'
       }
     };
 
@@ -47,8 +47,10 @@
     const playerBNameEl = document.getElementById('playerBName');
     const playerAValueEl = document.getElementById('playerAValue');
     const playerBValueEl = document.getElementById('playerBValue');
+    const playerARow = document.getElementById('playerARow');
+    const playerBRow = document.getElementById('playerBRow');
 
-    let currentMetricKey = 'total_points_won';
+    let currentMetricKey = 'points_on_serve';
     let lastValues = { keyA: undefined, keyB: undefined, names: ['', ''] };
     let lastVisibility;
     let lastMetricTitle;
@@ -67,7 +69,8 @@
     }
 
     function render(data) {
-      const metricKey = METRICS[data.doublebar_metric] ? data.doublebar_metric : 'total_points_won';
+      const metricKey = METRICS[data.doublebar_metric] ? data.doublebar_metric : 'points_on_serve';
+      
       if (metricKey !== currentMetricKey) {
         currentMetricKey = metricKey;
         lastValues = { keyA: undefined, keyB: undefined, names: lastValues.names };
@@ -86,7 +89,11 @@
         lastVisibility = isVisible;
       }
 
-      const headerText = `${metric.title} SO FAR`.toUpperCase();
+      // Show both players
+      playerARow.style.display = 'flex';
+      playerBRow.style.display = 'flex';
+      
+      const headerText = metric.title.toUpperCase();
       if (headerText !== lastMetricTitle) {
         metricTitle.textContent = headerText;
         lastMetricTitle = headerText;

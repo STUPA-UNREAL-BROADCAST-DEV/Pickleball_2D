@@ -13,23 +13,36 @@ const defaultState = {
   selected_game: 1,
   rally_count: 0,
   player_a_name: 'Player A',
-  player_a_total_points_won: 0,
-  player_a_total_serves_done: 0,
   player_a_points_on_serve: 0,
   player_a_forced_errors: 0,
   player_a_unforced_errors: 0,
+  player_a_smash_wins: 0,
+  player_a_lob_wins: 0,
+  player_a_drive_wins: 0,
+  player_a_net_errors: 0,
+  player_a_missed_errors: 0,
+  player_a_out_errors: 0,
   player_b_name: 'Player B',
-  player_b_total_points_won: 0,
-  player_b_total_serves_done: 0,
   player_b_points_on_serve: 0,
   player_b_forced_errors: 0,
   player_b_unforced_errors: 0,
+  player_b_smash_wins: 0,
+  player_b_lob_wins: 0,
+  player_b_drive_wins: 0,
+  player_b_net_errors: 0,
+  player_b_missed_errors: 0,
+  player_b_out_errors: 0,
   singlebar_visible: true,
   doublebar_visible: true,
-  doublebar_metric: 'total_points_won',
+  doublebar_metric: 'points_on_serve',
   singleplayer_visible: true,
   singleplayer_player: 'a',
-  singleplayer_metric: 'total_points_won'
+  singleplayer_metric: 'points_on_serve',
+  triplebar_visible: true,
+  triplebar_player: 'a',
+  triplebar_type: 'shotwins',
+  errorscomparison_visible: true,
+  errorscomparison_player: 'a'
 };
 
 if (!fs.existsSync(DATA_FILE)) {
@@ -56,17 +69,25 @@ function extractRemoteState(raw, selectedGame = 1) {
   const normalized = {
     rally_count: matchMetadata.rally_count || 0,
     player_a_name: playerA.name || 'Player A',
-    player_a_total_points_won: playerA.total_points_won || 0,
-    player_a_total_serves_done: playerA.total_serves_done || 0,
     player_a_points_on_serve: playerA.points_on_serve || 0,
     player_a_forced_errors: playerA.forced_errors || 0,
     player_a_unforced_errors: playerA.unforced_errors || 0,
+    player_a_smash_wins: playerA.smash_wins || 0,
+    player_a_lob_wins: playerA.lob_wins || 0,
+    player_a_drive_wins: playerA.drive_wins || 0,
+    player_a_net_errors: playerA.net || 0,
+    player_a_missed_errors: playerA.missed || 0,
+    player_a_out_errors: playerA.out || 0,
     player_b_name: playerB.name || 'Player B',
-    player_b_total_points_won: playerB.total_points_won || 0,
-    player_b_total_serves_done: playerB.total_serves_done || 0,
     player_b_points_on_serve: playerB.points_on_serve || 0,
     player_b_forced_errors: playerB.forced_errors || 0,
-    player_b_unforced_errors: playerB.unforced_errors || 0
+    player_b_unforced_errors: playerB.unforced_errors || 0,
+    player_b_smash_wins: playerB.smash_wins || 0,
+    player_b_lob_wins: playerB.lob_wins || 0,
+    player_b_drive_wins: playerB.drive_wins || 0,
+    player_b_net_errors: playerB.net || 0,
+    player_b_missed_errors: playerB.missed || 0,
+    player_b_out_errors: playerB.out || 0
   };
 
   return normalized;
@@ -79,23 +100,36 @@ const allowedKeys = new Set([
   'selected_game',
   'rally_count',
   'player_a_name',
-  'player_a_total_points_won',
-  'player_a_total_serves_done',
   'player_a_points_on_serve',
   'player_a_forced_errors',
   'player_a_unforced_errors',
+  'player_a_smash_wins',
+  'player_a_lob_wins',
+  'player_a_drive_wins',
+  'player_a_net_errors',
+  'player_a_missed_errors',
+  'player_a_out_errors',
   'player_b_name',
-  'player_b_total_points_won',
-  'player_b_total_serves_done',
   'player_b_points_on_serve',
   'player_b_forced_errors',
   'player_b_unforced_errors',
+  'player_b_smash_wins',
+  'player_b_lob_wins',
+  'player_b_drive_wins',
+  'player_b_net_errors',
+  'player_b_missed_errors',
+  'player_b_out_errors',
   'singlebar_visible',
   'doublebar_visible',
   'doublebar_metric',
   'singleplayer_visible',
   'singleplayer_player',
-  'singleplayer_metric'
+  'singleplayer_metric',
+  'triplebar_visible',
+  'triplebar_player',
+  'triplebar_type',
+  'errorscomparison_visible',
+  'errorscomparison_player'
 ]);
 
 function readState() {
@@ -132,8 +166,8 @@ app.get('/singleplayer', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'singleplayer.html'));
 });
 
-app.get('/singleplayer', (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'singleplayer.html'));
+app.get('/triplebar', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'triplebar.html'));
 });
 
 app.get('/api/state', (req, res) => {
@@ -179,18 +213,28 @@ async function pollRemoteState() {
       return;
     }
 
-    // Preserve selected_game and visibility settings
-    const nextState = { 
-      ...currentState, 
-      ...remoteState,
-      selected_game: selectedGame,
-      singlebar_visible: currentState.singlebar_visible !== undefined ? currentState.singlebar_visible : true,
-      doublebar_visible: currentState.doublebar_visible !== undefined ? currentState.doublebar_visible : true,
-      doublebar_metric: currentState.doublebar_metric || 'total_points_won',
-      singleplayer_visible: currentState.singleplayer_visible !== undefined ? currentState.singleplayer_visible : true,
-      singleplayer_player: currentState.singleplayer_player || 'a',
-      singleplayer_metric: currentState.singleplayer_metric || 'total_points_won'
-    };
+    // Preserve selected_game, visibility settings, and local-only fields
+    // Only update fields that exist in remoteState (don't overwrite with defaults)
+    const nextState = { ...currentState };
+    
+    // Update only fields that exist in remoteState
+    Object.keys(remoteState).forEach(key => {
+      if (remoteState[key] !== undefined && remoteState[key] !== null) {
+        nextState[key] = remoteState[key];
+      }
+    });
+    
+    // Preserve UI control settings
+    nextState.selected_game = selectedGame;
+    if (currentState.singlebar_visible !== undefined) nextState.singlebar_visible = currentState.singlebar_visible;
+    if (currentState.doublebar_visible !== undefined) nextState.doublebar_visible = currentState.doublebar_visible;
+    if (currentState.doublebar_metric) nextState.doublebar_metric = currentState.doublebar_metric;
+    if (currentState.singleplayer_visible !== undefined) nextState.singleplayer_visible = currentState.singleplayer_visible;
+    if (currentState.singleplayer_player) nextState.singleplayer_player = currentState.singleplayer_player;
+    if (currentState.singleplayer_metric) nextState.singleplayer_metric = currentState.singleplayer_metric;
+    if (currentState.triplebar_visible !== undefined) nextState.triplebar_visible = currentState.triplebar_visible;
+    if (currentState.triplebar_player) nextState.triplebar_player = currentState.triplebar_player;
+    if (currentState.triplebar_type) nextState.triplebar_type = currentState.triplebar_type;
 
     if (JSON.stringify(currentState) !== JSON.stringify(nextState)) {
       writeState(nextState);

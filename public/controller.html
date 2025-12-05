@@ -10,114 +10,268 @@
 
 <body>
   <div class="controller">
-    <h1>Broadcast Graphics Controller</h1>
-    <p>
-      Use this panel to update the data that feeds the overlay graphics.
-      Overlays refresh automatically every two seconds.
-    </p>
-
-    <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
-      <a href="/singlebar" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Last Rally Overlay</a>
-      <a href="/doublebar" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Metric Overlay</a>
-      <a href="/singleplayer" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Single Player Overlay</a>
-    </div>
-
-    <section class="toggle-section">
-      <h2>Game Selection</h2>
-      <div style="margin-bottom: 1rem;">
-        <label for="selected_game">Select Game:</label>
-        <select id="selected_game" name="selected_game" style="width: 100%; padding: 0.65rem 0.75rem; border-radius: 12px; border: 1px solid rgba(23, 37, 63, 0.18); font-size: 0.92rem; background: var(--white); color: var(--navy); margin-top: 0.35rem;">
-          <option value="1">Game 1</option>
-          <option value="2">Game 2</option>
-          <option value="3">Game 3</option>
-          <option value="4">Game 4</option>
-        </select>
+    <header class="controller-header">
+      <div class="header-content">
+        <div>
+          <h1>Broadcast Controller</h1>
+          <p>Manage overlay graphics and player statistics</p>
+        </div>
+        <button type="button" class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+          <span class="dark-mode-icon">🌙</span>
+        </button>
       </div>
-    </section>
+    </header>
 
-    <section class="toggle-section">
-      <h2>Overlay Visibility</h2>
-      <div class="toggle-row" id="visibilityControls">
-        <button type="button" class="toggle-button" data-overlay="single" style="--overlay-color: var(--rally-color);">Single</button>
-        <button type="button" class="toggle-button" data-overlay="double" style="--overlay-color: var(--doublebar-color);">Double</button>
-        <button type="button" class="toggle-button" data-overlay="singleplayer" style="--overlay-color: var(--singleplayer-color);">Single Player</button>
+    <div class="controller-content">
+      <!-- Top Section: Overlay Windows + Display Controls (left) | Overlay Previews (right) -->
+      <div class="top-section-grid">
+        <!-- Left Column: Overlay Windows and Display Controls -->
+        <div class="left-column">
+          <!-- Quick Access Links -->
+          <section class="card">
+            <div class="card-header">
+              <h2>Overlay Windows</h2>
+            </div>
+            <div class="links-row">
+              <a href="/singlebar" target="_blank" class="link-btn">Rally</a>
+              <a href="/doublebar" target="_blank" class="link-btn">Double</a>
+              <a href="/singleplayer" target="_blank" class="link-btn">Single</a>
+              <a href="/triplebar" target="_blank" class="link-btn">Triple</a>
+            </div>
+          </section>
+
+          <!-- Display Controls -->
+          <section class="card">
+            <div class="card-header">
+              <h2>Display Controls</h2>
+            </div>
+            <div class="controls-grid-compact">
+              <div class="control-group">
+                <label for="selected_game">Game</label>
+                <select id="selected_game" name="selected_game">
+                  <option value="1">Game 1</option>
+                  <option value="2">Game 2</option>
+                  <option value="3">Game 3</option>
+                  <option value="4">Game 4</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Visibility</label>
+                <div class="button-group" id="visibilityControls">
+                  <button type="button" class="btn btn-sm" data-overlay="single" style="--overlay-color: var(--rally-color);">Rally</button>
+                  <button type="button" class="btn btn-sm" data-overlay="double" style="--overlay-color: var(--doublebar-color);">Double</button>
+                  <button type="button" class="btn btn-sm" data-overlay="singleplayer" style="--overlay-color: var(--singleplayer-color);">Single</button>
+                  <button type="button" class="btn btn-sm" data-overlay="triplebar" style="--overlay-color: var(--singleplayer-color);">Triple</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right Column: Overlay Previews -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Overlay Previews</h2>
+          </div>
+          <div class="previews-grid">
+          <!-- Rally Preview -->
+          <div class="preview-window" id="rallyPreview">
+            <div class="preview-header">Rally</div>
+            <div class="preview-content">
+              <div class="preview-label">Shots in Last Rally</div>
+              <div class="preview-value" id="previewRallyValue">0</div>
+            </div>
+          </div>
+
+          <!-- Double Preview -->
+          <div class="preview-window" id="doublePreview">
+            <div class="preview-header">Double</div>
+            <div class="preview-content">
+              <div class="preview-metric" id="previewDoubleMetric">Points on Serve</div>
+              <div class="preview-row">
+                <span class="preview-player" id="previewDoublePlayerA">Player A</span>
+                <span class="preview-value-small" id="previewDoubleValueA">0</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-player" id="previewDoublePlayerB">Player B</span>
+                <span class="preview-value-small" id="previewDoubleValueB">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Single Player Preview -->
+          <div class="preview-window" id="singlePlayerPreview">
+            <div class="preview-header">Single</div>
+            <div class="preview-content">
+              <div class="preview-metric" id="previewSingleMetric">Points on Serve</div>
+              <div class="preview-row">
+                <span class="preview-player" id="previewSinglePlayer">Player A</span>
+                <span class="preview-value-small" id="previewSingleValue">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Triple Bar Preview -->
+          <div class="preview-window" id="tripleBarPreview">
+            <div class="preview-header">Triple</div>
+            <div class="preview-content">
+              <div class="preview-metric" id="previewTripleMetric">Shot Wins</div>
+              <div class="preview-player-name" id="previewTriplePlayer">Player A</div>
+              <div class="preview-row">
+                <span class="preview-label-small" id="previewTripleLabel1">Smash</span>
+                <span class="preview-value-small" id="previewTripleValue1">0</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label-small" id="previewTripleLabel2">Lob</span>
+                <span class="preview-value-small" id="previewTripleValue2">0</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label-small" id="previewTripleLabel3">Drive</span>
+                <span class="preview-value-small" id="previewTripleValue3">0</span>
+              </div>
+            </div>
+          </div>
+          </div>
+        </section>
       </div>
-    </section>
 
-    <section class="toggle-section">
-      <h2>Quick Animations</h2>
-      <div class="toggle-row" id="quickControls">
-        <button type="button" class="toggle-button action-button" data-type="rally">Rally</button>
-        <button type="button" class="toggle-button action-button" data-type="total_points_won">Total Points Won</button>
-        <button type="button" class="toggle-button action-button" data-type="total_serves_done">Total Serves Done</button>
-        <button type="button" class="toggle-button action-button" data-type="points_on_serve">Points on Serve</button>
-      </div>
-    </section>
-
-    <section class="toggle-section">
-      <h2>Single Player Controls</h2>
-      <div class="toggle-row" id="singlePlayerControls">
-        <!-- Buttons will be dynamically generated -->
-      </div>
-    </section>
-
+      <!-- Statistics Form & Player Overlays Side by Side -->
+      <div class="stats-overlays-grid">
+        <!-- Statistics Form -->
+        <section class="card card-form">
+          <div class="card-header">
+            <h2>Statistics</h2>
+          </div>
     <form id="stateForm">
-      <div class="form-grid">
-        <div style="grid-column: 1 / -1;">
+          <div class="rally-control">
+            <div class="input-group">
           <label for="rally_count">Rally Count</label>
           <input type="number" id="rally_count" name="rally_count" min="0" />
         </div>
-        <div>
-          <label for="player_a_name">Player A Name</label>
-          <input type="text" id="player_a_name" name="player_a_name" />
+            <button type="button" class="btn rally-trigger" data-type="rally">Show Rally</button>
         </div>
-        <div>
-          <label for="player_b_name">Player B Name</label>
-          <input type="text" id="player_b_name" name="player_b_name" />
+
+          <div class="players-grid">
+            <div class="player-card player-card-a">
+              <div class="player-card-header">
+                <label for="player_a_name">Player A</label>
+                <input type="text" id="player_a_name" name="player_a_name" class="player-name" placeholder="Name" />
         </div>
-        <div>
-          <label for="player_a_total_points_won" id="label_player_a_total_points_won">Player A Total Points Won</label>
-          <input type="number" id="player_a_total_points_won" name="player_a_total_points_won" min="0" />
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <label for="player_a_points_on_serve" id="label_player_a_points_on_serve">Points on Serve</label>
+                  <input type="number" id="player_a_points_on_serve" name="player_a_points_on_serve" min="0" />
         </div>
-        <div>
-          <label for="player_b_total_points_won" id="label_player_b_total_points_won">Player B Total Points Won</label>
-          <input type="number" id="player_b_total_points_won" name="player_b_total_points_won" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_forced_errors" id="label_player_a_forced_errors">Forced Errors</label>
+                  <input type="number" id="player_a_forced_errors" name="player_a_forced_errors" min="0" />
         </div>
-        <div>
-          <label for="player_a_total_serves_done" id="label_player_a_total_serves_done">Player A Total Serves Done</label>
-          <input type="number" id="player_a_total_serves_done" name="player_a_total_serves_done" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_unforced_errors" id="label_player_a_unforced_errors">Unforced Errors</label>
+                  <input type="number" id="player_a_unforced_errors" name="player_a_unforced_errors" min="0" />
         </div>
-        <div>
-          <label for="player_b_total_serves_done" id="label_player_b_total_serves_done">Player B Total Serves Done</label>
-          <input type="number" id="player_b_total_serves_done" name="player_b_total_serves_done" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_smash_wins" id="label_player_a_smash_wins">Smash Wins</label>
+                  <input type="number" id="player_a_smash_wins" name="player_a_smash_wins" min="0" />
         </div>
-        <div>
-          <label for="player_a_points_on_serve" id="label_player_a_points_on_serve">Player A Points on Serve</label>
-          <input type="number" id="player_a_points_on_serve" name="player_a_points_on_serve" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_lob_wins" id="label_player_a_lob_wins">Lob Wins</label>
+                  <input type="number" id="player_a_lob_wins" name="player_a_lob_wins" min="0" />
         </div>
-        <div>
-          <label for="player_b_points_on_serve" id="label_player_b_points_on_serve">Player B Points on Serve</label>
-          <input type="number" id="player_b_points_on_serve" name="player_b_points_on_serve" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_drive_wins" id="label_player_a_drive_wins">Drive Wins</label>
+                  <input type="number" id="player_a_drive_wins" name="player_a_drive_wins" min="0" />
         </div>
-        <div>
-          <label for="player_a_forced_errors" id="label_player_a_forced_errors">Player A Forced Errors</label>
-          <input type="number" id="player_a_forced_errors" name="player_a_forced_errors" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_net_errors" id="label_player_a_net_errors">Net Errors</label>
+                  <input type="number" id="player_a_net_errors" name="player_a_net_errors" min="0" />
         </div>
-        <div>
-          <label for="player_b_forced_errors" id="label_player_b_forced_errors">Player B Forced Errors</label>
-          <input type="number" id="player_b_forced_errors" name="player_b_forced_errors" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_missed_errors" id="label_player_a_missed_errors">Missed Errors</label>
+                  <input type="number" id="player_a_missed_errors" name="player_a_missed_errors" min="0" />
         </div>
-        <div>
-          <label for="player_a_unforced_errors" id="label_player_a_unforced_errors">Player A Unforced Errors</label>
-          <input type="number" id="player_a_unforced_errors" name="player_a_unforced_errors" min="0" />
+                <div class="stat-item">
+                  <label for="player_a_out_errors" id="label_player_a_out_errors">Out Errors</label>
+                  <input type="number" id="player_a_out_errors" name="player_a_out_errors" min="0" />
         </div>
-        <div>
-          <label for="player_b_unforced_errors" id="label_player_b_unforced_errors">Player B Unforced Errors</label>
+              </div>
+              <div class="player-controls-section">
+                <h4>Single Player Controls</h4>
+                <div class="button-group" id="singlePlayerControlsA"></div>
+              </div>
+            </div>
+
+            <div class="player-card player-card-b">
+              <div class="player-card-header">
+                <label for="player_b_name">Player B</label>
+                <input type="text" id="player_b_name" name="player_b_name" class="player-name" placeholder="Name" />
+              </div>
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <label for="player_b_points_on_serve" id="label_player_b_points_on_serve">Points on Serve</label>
+                  <input type="number" id="player_b_points_on_serve" name="player_b_points_on_serve" min="0" />
+                </div>
+                <div class="stat-item">
+                  <label for="player_b_forced_errors" id="label_player_b_forced_errors">Forced Errors</label>
+                  <input type="number" id="player_b_forced_errors" name="player_b_forced_errors" min="0" />
+                </div>
+                <div class="stat-item">
+                  <label for="player_b_unforced_errors" id="label_player_b_unforced_errors">Unforced Errors</label>
           <input type="number" id="player_b_unforced_errors" name="player_b_unforced_errors" min="0" />
         </div>
+                <div class="stat-item">
+                  <label for="player_b_smash_wins" id="label_player_b_smash_wins">Smash Wins</label>
+                  <input type="number" id="player_b_smash_wins" name="player_b_smash_wins" min="0" />
       </div>
-      <button type="submit" class="primary">Push Update</button>
+                <div class="stat-item">
+                  <label for="player_b_lob_wins" id="label_player_b_lob_wins">Lob Wins</label>
+                  <input type="number" id="player_b_lob_wins" name="player_b_lob_wins" min="0" />
+                </div>
+                <div class="stat-item">
+                  <label for="player_b_drive_wins" id="label_player_b_drive_wins">Drive Wins</label>
+                  <input type="number" id="player_b_drive_wins" name="player_b_drive_wins" min="0" />
+                </div>
+                <div class="stat-item">
+                  <label for="player_b_net_errors" id="label_player_b_net_errors">Net Errors</label>
+                  <input type="number" id="player_b_net_errors" name="player_b_net_errors" min="0" />
+                </div>
+                <div class="stat-item">
+                  <label for="player_b_missed_errors" id="label_player_b_missed_errors">Missed Errors</label>
+                  <input type="number" id="player_b_missed_errors" name="player_b_missed_errors" min="0" />
+                </div>
+                <div class="stat-item">
+                  <label for="player_b_out_errors" id="label_player_b_out_errors">Out Errors</label>
+                  <input type="number" id="player_b_out_errors" name="player_b_out_errors" min="0" />
+                </div>
+              </div>
+              <div class="player-controls-section">
+                <h4>Single Player Controls</h4>
+                <div class="button-group" id="singlePlayerControlsB"></div>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-submit">Update All Stats</button>
     </form>
+      </section>
+
+      <!-- Player Controls -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Player Overlays</h2>
+        </div>
+        <div class="player-controls-grid">
+          <div class="player-control-group">
+            <h3>Double Bar</h3>
+            <div class="button-group" id="doubleBarControls"></div>
+          </div>
+          <div class="player-control-group">
+            <h3>Triple Bar</h3>
+            <div class="button-group" id="tripleBarControls"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+    </div>
 
     <div class="status" id="status"></div>
   </div>
@@ -125,36 +279,48 @@
   <script>
     const numericFields = [
       'rally_count',
-      'player_a_total_points_won',
-      'player_b_total_points_won',
-      'player_a_total_serves_done',
-      'player_b_total_serves_done',
       'player_a_points_on_serve',
       'player_b_points_on_serve',
       'player_a_forced_errors',
       'player_b_forced_errors',
       'player_a_unforced_errors',
-      'player_b_unforced_errors'
+      'player_b_unforced_errors',
+      'player_a_smash_wins',
+      'player_b_smash_wins',
+      'player_a_lob_wins',
+      'player_b_lob_wins',
+      'player_a_drive_wins',
+      'player_b_drive_wins',
+      'player_a_net_errors',
+      'player_b_net_errors',
+      'player_a_missed_errors',
+      'player_b_missed_errors',
+      'player_a_out_errors',
+      'player_b_out_errors'
     ];
 
     const numericFieldSet = new Set(numericFields);
-    const METRIC_KEYS = ['total_points_won', 'total_serves_done', 'points_on_serve', 'forced_errors', 'unforced_errors'];
+    const METRIC_KEYS = ['points_on_serve', 'forced_errors', 'unforced_errors'];
 
     const form = document.getElementById('stateForm');
     const statusEl = document.getElementById('status');
-    const visibilityButtons = document.querySelectorAll('#visibilityControls .toggle-button');
-    const actionButtons = document.querySelectorAll('.action-button');
+    const visibilityButtons = document.querySelectorAll('#visibilityControls .btn');
+    const actionButtons = document.querySelectorAll('.rally-trigger');
     const gameSelect = document.getElementById('selected_game');
 
     const visibilityState = {
       single: true,
       double: true,
-      singleplayer: true
+      singleplayer: true,
+      triplebar: true
     };
 
-    let metricState = 'total_points_won';
-    let singlePlayerMetricState = 'total_points_won';
+    let metricState = 'points_on_serve';
+    let singlePlayerMetricState = 'points_on_serve';
     let singlePlayerState = 'a';
+    let triplebarTypeState = 'shotwins';
+    let triplebarPlayerState = 'a';
+    let doublebarPlayerState = 'a';
     let isSyncing = false;
 
     async function loadState(options = {}) {
@@ -192,20 +358,30 @@
         visibilityState.single = data.singlebar_visible !== false;
         visibilityState.double = data.doublebar_visible !== false;
         visibilityState.singleplayer = data.singleplayer_visible !== false;
+        visibilityState.triplebar = data.triplebar_visible !== false;
         metricState = data.doublebar_metric && METRIC_KEYS.includes(data.doublebar_metric)
           ? data.doublebar_metric
-          : 'total_points_won';
+          : 'points_on_serve';
         singlePlayerMetricState = data.singleplayer_metric && METRIC_KEYS.includes(data.singleplayer_metric)
           ? data.singleplayer_metric
-          : 'total_points_won';
+          : 'points_on_serve';
         singlePlayerState = data.singleplayer_player === 'b' ? 'b' : 'a';
+        triplebarTypeState = data.triplebar_type === 'errors' ? 'errors' : 'shotwins';
+        triplebarPlayerState = data.triplebar_player === 'b' ? 'b' : 'a';
+        doublebarPlayerState = data.doublebar_player === 'b' ? 'b' : 'a';
 
         const playerAName = data.player_a_name || 'Player A';
         const playerBName = data.player_b_name || 'Player B';
         updateLabels(playerAName, playerBName);
         updateSinglePlayerButtons(playerAName, playerBName);
+        updateTripleBarButtons(playerAName, playerBName);
+        updateDoubleBarButtons(playerAName, playerBName);
         updateVisibilityButtons();
         updateActionButtons();
+        updateTripleBarButtonStates();
+        updateDoubleBarButtonStates();
+        updateRallyButton();
+        updatePreviews(data);
 
         return true;
       } catch (error) {
@@ -244,7 +420,7 @@
         }
       });
 
-      const succeeded = await pushUpdate(payload, 'Update sent to overlays.');
+      const succeeded = await pushUpdate(payload, 'Statistics updated.');
       if (succeeded) {
         await loadState({ force: true, silent: true });
       }
@@ -253,7 +429,7 @@
     visibilityButtons.forEach((button) => {
       button.addEventListener('click', async () => {
         const overlay = button.getAttribute('data-overlay');
-        if (!overlay || (overlay !== 'single' && overlay !== 'double' && overlay !== 'singleplayer')) {
+        if (!overlay || (overlay !== 'single' && overlay !== 'double' && overlay !== 'singleplayer' && overlay !== 'triplebar')) {
           return;
         }
         const isVisible = !visibilityState[overlay];
@@ -262,26 +438,40 @@
         if (overlay === 'single') {
           payload = { singlebar_visible: isVisible };
         } else if (overlay === 'double') {
-          payload = { doublebar_visible: isVisible };
+          // Preserve current player and metric when toggling visibility
+          payload = { 
+            doublebar_visible: isVisible,
+            doublebar_metric: metricState,
+            doublebar_player: doublebarPlayerState
+          };
         } else if (overlay === 'singleplayer') {
           payload = { singleplayer_visible: isVisible };
+        } else if (overlay === 'triplebar') {
+          payload = { triplebar_visible: isVisible };
         }
 
         visibilityState[overlay] = isVisible;
         updateVisibilityButtons();
+        const overlayNames = {
+          single: 'Rally',
+          double: 'Double',
+          singleplayer: 'Single',
+          triplebar: 'Triple'
+        };
         const succeeded = await pushUpdate(
           payload,
-          `${overlay === 'single' ? 'Single' : overlay === 'double' ? 'Double' : 'Single Player'} overlay ${isVisible ? 'animated in' : 'taken out'}.`
+          `${overlayNames[overlay]} overlay ${isVisible ? 'shown' : 'hidden'}.`
         );
 
         if (!succeeded) {
           visibilityState[overlay] = !isVisible;
           updateVisibilityButtons();
         }
-        updateActionButtons();
         if (typeof updateSinglePlayerButtonStates === 'function') {
           updateSinglePlayerButtonStates();
         }
+        updateTripleBarButtonStates();
+        updateDoubleBarButtonStates();
 
         if (succeeded) {
           await loadState({ force: true, silent: true });
@@ -297,65 +487,23 @@
           const isVisible = !visibilityState.single;
           visibilityState.single = isVisible;
           updateVisibilityButtons();
-          updateActionButtons();
+          updateRallyButton();
           const succeeded = await pushUpdate(
             { singlebar_visible: isVisible },
-            `Rally overlay ${isVisible ? 'animated in' : 'taken out'}.`
+            `Rally overlay ${isVisible ? 'shown' : 'hidden'}.`
           );
           if (!succeeded) {
             visibilityState.single = !isVisible;
             updateVisibilityButtons();
-            updateActionButtons();
-          } else {
-            await loadState({ force: true, silent: true });
-          }
-          return;
-        }
-
-        if (!METRIC_KEYS.includes(type)) {
-          return;
-        }
-
-        // For metrics, toggle between showing this metric or hiding
-        if (visibilityState.double && metricState === type) {
-          // Currently showing this metric, so hide it
-          visibilityState.double = false;
-          updateVisibilityButtons();
-          updateActionButtons();
-          const succeeded = await pushUpdate(
-            { doublebar_visible: false },
-            `${formatMetricLabel(type)} overlay taken out.`
-          );
-          if (!succeeded) {
-            visibilityState.double = true;
-            updateVisibilityButtons();
-            updateActionButtons();
-          } else {
-            await loadState({ force: true, silent: true });
-          }
-        } else {
-          // Show this metric
-          const previousMetric = metricState;
-          const previousVisibility = visibilityState.double;
-          metricState = type;
-          visibilityState.double = true;
-          updateVisibilityButtons();
-          updateActionButtons();
-          const succeeded = await pushUpdate(
-            { doublebar_visible: true, doublebar_metric: type },
-            `${formatMetricLabel(type)} overlay animated in.`
-          );
-          if (!succeeded) {
-            metricState = previousMetric;
-            visibilityState.double = previousVisibility;
-            updateVisibilityButtons();
-            updateActionButtons();
+            updateRallyButton();
           } else {
             await loadState({ force: true, silent: true });
           }
         }
       });
     });
+
+    // Removed Quick Actions handlers - functionality moved to Player Overlays
 
     function updateVisibilityButtons() {
       visibilityButtons.forEach((button) => {
@@ -365,25 +513,22 @@
       });
     }
 
-    function updateActionButtons() {
-      actionButtons.forEach((button) => {
-        const type = button.getAttribute('data-type');
-        let active = false;
-
-        if (type === 'rally') {
-          active = visibilityState.single === true;
-        } else if (METRIC_KEYS.includes(type)) {
-          active = visibilityState.double && metricState === type;
-        }
-
-        button.classList.toggle('active', active);
-      });
+    function updateRallyButton() {
+      const rallyButton = document.querySelector('.rally-trigger');
+      if (rallyButton) {
+        const isActive = visibilityState.single === true;
+        rallyButton.classList.toggle('active', isActive);
+      }
     }
 
-    const singlePlayerControlsContainer = document.getElementById('singlePlayerControls');
+    function updateActionButtons() {
+      // Only handles rally button, which is managed by updateRallyButton
+      // This function kept for compatibility but does nothing
+    }
+
+    const singlePlayerControlsContainerA = document.getElementById('singlePlayerControlsA');
+    const singlePlayerControlsContainerB = document.getElementById('singlePlayerControlsB');
     const METRIC_LABELS = {
-      total_points_won: 'Total Points Won',
-      total_serves_done: 'Total Serves Done',
       points_on_serve: 'Points on Serve',
       forced_errors: 'Forced Errors',
       unforced_errors: 'Unforced Errors'
@@ -397,47 +542,48 @@
     }
 
     function updateSinglePlayerButtons(playerAName, playerBName) {
-      if (!singlePlayerControlsContainer) return;
-      
       const firstNameA = extractFirstName(playerAName);
       const firstNameB = extractFirstName(playerBName);
       
-      // Clear existing buttons
-      singlePlayerControlsContainer.innerHTML = '';
+      const metrics = ['points_on_serve', 'forced_errors', 'unforced_errors'];
       
-      // Create 10 buttons: 5 metrics × 2 players
-      const metrics = ['total_points_won', 'total_serves_done', 'points_on_serve', 'forced_errors', 'unforced_errors'];
-      
+      // Update Player A controls
+      if (singlePlayerControlsContainerA) {
+        singlePlayerControlsContainerA.innerHTML = '';
       metrics.forEach(metric => {
-        // Player A button
         const buttonA = document.createElement('button');
         buttonA.type = 'button';
-        buttonA.className = 'toggle-button action-button';
+          buttonA.className = 'btn btn-sm';
         buttonA.setAttribute('data-type', `singleplayer_${metric}`);
         buttonA.setAttribute('data-player', 'a');
-        buttonA.textContent = `${firstNameA}'s ${METRIC_LABELS[metric]}`;
-        buttonA.style.setProperty('--overlay-color', 'var(--singleplayer-color)');
-        singlePlayerControlsContainer.appendChild(buttonA);
-        
-        // Player B button
+          buttonA.textContent = `${METRIC_LABELS[metric]}`;
+          singlePlayerControlsContainerA.appendChild(buttonA);
+        });
+      }
+      
+      // Update Player B controls
+      if (singlePlayerControlsContainerB) {
+        singlePlayerControlsContainerB.innerHTML = '';
+        metrics.forEach(metric => {
         const buttonB = document.createElement('button');
         buttonB.type = 'button';
-        buttonB.className = 'toggle-button action-button';
+          buttonB.className = 'btn btn-sm';
         buttonB.setAttribute('data-type', `singleplayer_${metric}`);
         buttonB.setAttribute('data-player', 'b');
-        buttonB.textContent = `${firstNameB}'s ${METRIC_LABELS[metric]}`;
-        buttonB.style.setProperty('--overlay-color', 'var(--singleplayer-color)');
-        singlePlayerControlsContainer.appendChild(buttonB);
+          buttonB.textContent = `${METRIC_LABELS[metric]}`;
+          singlePlayerControlsContainerB.appendChild(buttonB);
       });
+      }
       
-      // Re-attach event listeners
       attachSinglePlayerButtonListeners();
       updateSinglePlayerButtonStates();
     }
 
     function updateSinglePlayerButtonStates() {
-      if (!singlePlayerControlsContainer) return;
-      const buttons = singlePlayerControlsContainer.querySelectorAll('.action-button');
+      const containers = [singlePlayerControlsContainerA, singlePlayerControlsContainerB];
+      containers.forEach(container => {
+        if (!container) return;
+        const buttons = container.querySelectorAll('.btn');
       buttons.forEach((button) => {
         const type = button.getAttribute('data-type');
         const player = button.getAttribute('data-player');
@@ -451,14 +597,16 @@
         }
 
         button.classList.toggle('active', active);
+        });
       });
     }
 
     function attachSinglePlayerButtonListeners() {
-      if (!singlePlayerControlsContainer) return;
-      const buttons = singlePlayerControlsContainer.querySelectorAll('.action-button');
+      const containers = [singlePlayerControlsContainerA, singlePlayerControlsContainerB];
+      containers.forEach(container => {
+        if (!container) return;
+        const buttons = container.querySelectorAll('.btn');
       buttons.forEach((button) => {
-        // Remove existing listeners by cloning
         const newButton = button.cloneNode(true);
         button.parentNode.replaceChild(newButton, button);
         
@@ -477,13 +625,12 @@
           const firstName = extractFirstName(playerName);
           
           if (visibilityState.singleplayer && singlePlayerMetricState === metric && singlePlayerState === player) {
-            // Currently showing this exact combination, so hide it
             visibilityState.singleplayer = false;
             updateVisibilityButtons();
             updateSinglePlayerButtonStates();
             const succeeded = await pushUpdate(
               { singleplayer_visible: false },
-              `${firstName}'s ${METRIC_LABELS[metric]} overlay taken out.`
+              `${firstName}'s ${METRIC_LABELS[metric]} hidden.`
             );
             if (!succeeded) {
               visibilityState.singleplayer = true;
@@ -493,7 +640,6 @@
               await loadState({ force: true, silent: true });
             }
           } else {
-            // Show this metric for this player
             const previousMetric = singlePlayerMetricState;
             const previousPlayer = singlePlayerState;
             const previousVisibility = visibilityState.singleplayer;
@@ -504,7 +650,7 @@
             updateSinglePlayerButtonStates();
             const succeeded = await pushUpdate(
               { singleplayer_visible: true, singleplayer_metric: metric, singleplayer_player: player },
-              `${firstName}'s ${METRIC_LABELS[metric]} overlay animated in.`
+              `${firstName}'s ${METRIC_LABELS[metric]} shown.`
             );
             if (!succeeded) {
               singlePlayerMetricState = previousMetric;
@@ -517,12 +663,237 @@
             }
           }
         });
+        });
       });
     }
 
-    // Initialize buttons on page load
-    if (singlePlayerControlsContainer) {
+    const tripleBarControlsContainer = document.getElementById('tripleBarControls');
+    const doubleBarControlsContainer = document.getElementById('doubleBarControls');
+
+    function updateDoubleBarButtons(playerAName, playerBName) {
+      if (!doubleBarControlsContainer) return;
+      
+      doubleBarControlsContainer.innerHTML = '';
+      
+      const metrics = ['points_on_serve', 'forced_errors', 'unforced_errors'];
+      
+      metrics.forEach(metric => {
+        const metricLabel = METRIC_LABELS[metric] || metric;
+        
+        // Single button per metric (doublebar shows both players)
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-sm';
+        button.setAttribute('data-type', `doublebar_${metric}`);
+        button.setAttribute('data-player', 'a'); // Default, not used for display
+        button.textContent = metricLabel;
+        doubleBarControlsContainer.appendChild(button);
+      });
+      
+      attachDoubleBarButtonListeners();
+      updateDoubleBarButtonStates();
+    }
+
+    function updateDoubleBarButtonStates() {
+      if (!doubleBarControlsContainer) return;
+      const buttons = doubleBarControlsContainer.querySelectorAll('.btn');
+      buttons.forEach((button) => {
+        const type = button.getAttribute('data-type');
+        let active = false;
+
+        if (type && type.startsWith('doublebar_')) {
+          const metric = type.replace('doublebar_', '');
+          // Doublebar shows both players, so just check metric match
+          active = visibilityState.double && metricState === metric;
+        }
+
+        button.classList.toggle('active', active);
+      });
+    }
+
+    function attachDoubleBarButtonListeners() {
+      if (!doubleBarControlsContainer) return;
+      const buttons = doubleBarControlsContainer.querySelectorAll('.btn');
+      buttons.forEach((button) => {
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async () => {
+          const type = newButton.getAttribute('data-type');
+          
+          if (!type || !type.startsWith('doublebar_')) {
+            return;
+          }
+
+          const metric = type.replace('doublebar_', '');
+          const metricLabel = METRIC_LABELS[metric] || metric;
+          
+          if (visibilityState.double && metricState === metric) {
+            visibilityState.double = false;
+            updateVisibilityButtons();
+            updateDoubleBarButtonStates();
+            const succeeded = await pushUpdate(
+              { doublebar_visible: false },
+              `${metricLabel} hidden.`
+            );
+            if (!succeeded) {
+              visibilityState.double = true;
+              updateVisibilityButtons();
+              updateDoubleBarButtonStates();
+            } else {
+              await loadState({ force: true, silent: true });
+            }
+          } else {
+            const previousMetric = metricState;
+            const previousVisibility = visibilityState.double;
+            metricState = metric;
+            visibilityState.double = true;
+            updateVisibilityButtons();
+            updateDoubleBarButtonStates();
+            const succeeded = await pushUpdate(
+              { doublebar_visible: true, doublebar_metric: metric, doublebar_player: 'a' },
+              `${metricLabel} shown.`
+            );
+            if (!succeeded) {
+              metricState = previousMetric;
+              visibilityState.double = previousVisibility;
+              updateVisibilityButtons();
+              updateDoubleBarButtonStates();
+            } else {
+              await loadState({ force: true, silent: true });
+            }
+          }
+        });
+      });
+    }
+
+    function updateTripleBarButtons(playerAName, playerBName) {
+      if (!tripleBarControlsContainer) return;
+      
+      const firstNameA = extractFirstName(playerAName);
+      const firstNameB = extractFirstName(playerBName);
+      
+      tripleBarControlsContainer.innerHTML = '';
+      
+      const buttonA1 = document.createElement('button');
+      buttonA1.type = 'button';
+      buttonA1.className = 'btn btn-sm';
+      buttonA1.setAttribute('data-type', 'triplebar_player');
+      buttonA1.setAttribute('data-player', 'a');
+      buttonA1.setAttribute('data-tripletype', 'shotwins');
+      buttonA1.textContent = `${firstNameA} - Shot Wins`;
+      tripleBarControlsContainer.appendChild(buttonA1);
+      
+      const buttonB1 = document.createElement('button');
+      buttonB1.type = 'button';
+      buttonB1.className = 'btn btn-sm';
+      buttonB1.setAttribute('data-type', 'triplebar_player');
+      buttonB1.setAttribute('data-player', 'b');
+      buttonB1.setAttribute('data-tripletype', 'shotwins');
+      buttonB1.textContent = `${firstNameB} - Shot Wins`;
+      tripleBarControlsContainer.appendChild(buttonB1);
+      
+      const buttonA2 = document.createElement('button');
+      buttonA2.type = 'button';
+      buttonA2.className = 'btn btn-sm';
+      buttonA2.setAttribute('data-type', 'triplebar_player');
+      buttonA2.setAttribute('data-player', 'a');
+      buttonA2.setAttribute('data-tripletype', 'errors');
+      buttonA2.textContent = `${firstNameA} - Errors`;
+      tripleBarControlsContainer.appendChild(buttonA2);
+      
+      const buttonB2 = document.createElement('button');
+      buttonB2.type = 'button';
+      buttonB2.className = 'btn btn-sm';
+      buttonB2.setAttribute('data-type', 'triplebar_player');
+      buttonB2.setAttribute('data-player', 'b');
+      buttonB2.setAttribute('data-tripletype', 'errors');
+      buttonB2.textContent = `${firstNameB} - Errors`;
+      tripleBarControlsContainer.appendChild(buttonB2);
+      
+      attachTripleBarButtonListeners();
+      updateTripleBarButtonStates();
+    }
+
+    function updateTripleBarButtonStates() {
+      if (!tripleBarControlsContainer) return;
+      const buttons = tripleBarControlsContainer.querySelectorAll('.btn');
+      buttons.forEach((button) => {
+        const player = button.getAttribute('data-player');
+        const type = button.getAttribute('data-tripletype');
+        const active = visibilityState.triplebar && 
+                       triplebarPlayerState === player && 
+                       triplebarTypeState === type;
+        button.classList.toggle('active', active);
+      });
+    }
+
+    function attachTripleBarButtonListeners() {
+      if (!tripleBarControlsContainer) return;
+      const buttons = tripleBarControlsContainer.querySelectorAll('.btn');
+      buttons.forEach((button) => {
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async () => {
+          const player = newButton.getAttribute('data-player');
+          const type = newButton.getAttribute('data-tripletype');
+          const playerName = player === 'a' 
+            ? (document.getElementById('player_a_name')?.value || 'Player A')
+            : (document.getElementById('player_b_name')?.value || 'Player B');
+          const firstName = extractFirstName(playerName);
+          const typeLabel = type === 'shotwins' ? 'Shot Wins' : 'Errors';
+          
+          if (visibilityState.triplebar && triplebarPlayerState === player && triplebarTypeState === type) {
+            visibilityState.triplebar = false;
+            updateVisibilityButtons();
+            updateTripleBarButtonStates();
+            const succeeded = await pushUpdate(
+              { triplebar_visible: false },
+              `${firstName}'s ${typeLabel} hidden.`
+            );
+            if (!succeeded) {
+              visibilityState.triplebar = true;
+              updateVisibilityButtons();
+              updateTripleBarButtonStates();
+            } else {
+              await loadState({ force: true, silent: true });
+            }
+          } else {
+            const previousPlayer = triplebarPlayerState;
+            const previousType = triplebarTypeState;
+            const previousVisibility = visibilityState.triplebar;
+            triplebarPlayerState = player;
+            triplebarTypeState = type;
+            visibilityState.triplebar = true;
+            updateVisibilityButtons();
+            updateTripleBarButtonStates();
+            const succeeded = await pushUpdate(
+              { triplebar_visible: true, triplebar_player: player, triplebar_type: type },
+              `${firstName}'s ${typeLabel} shown.`
+            );
+            if (!succeeded) {
+              triplebarPlayerState = previousPlayer;
+              triplebarTypeState = previousType;
+              visibilityState.triplebar = previousVisibility;
+              updateVisibilityButtons();
+              updateTripleBarButtonStates();
+            } else {
+              await loadState({ force: true, silent: true });
+            }
+          }
+        });
+      });
+    }
+
+    if (singlePlayerControlsContainerA && singlePlayerControlsContainerB) {
       updateSinglePlayerButtons('Player A', 'Player B');
+    }
+    if (tripleBarControlsContainer) {
+      updateTripleBarButtons('Player A', 'Player B');
+    }
+    if (doubleBarControlsContainer) {
+      updateDoubleBarButtons('Player A', 'Player B');
     }
 
     async function pushUpdate(payload, successMessage) {
@@ -546,33 +917,10 @@
       }
     }
 
-    function extractFirstName(fullName) {
-      if (!fullName || fullName === 'Player A' || fullName === 'Player B') {
-        return fullName;
-      }
-      return fullName.split(/[\s\/]+/)[0];
-    }
-
     function updateLabels(playerAName, playerBName) {
-      const firstNameA = extractFirstName(playerAName);
-      const firstNameB = extractFirstName(playerBName);
-
-      document.getElementById('label_player_a_total_points_won').textContent = `${firstNameA}'s Total Points Won`;
-      document.getElementById('label_player_b_total_points_won').textContent = `${firstNameB}'s Total Points Won`;
-      document.getElementById('label_player_a_total_serves_done').textContent = `${firstNameA}'s Total Serves Done`;
-      document.getElementById('label_player_b_total_serves_done').textContent = `${firstNameB}'s Total Serves Done`;
-      document.getElementById('label_player_a_points_on_serve').textContent = `${firstNameA}'s Points on Serve`;
-      document.getElementById('label_player_b_points_on_serve').textContent = `${firstNameB}'s Points on Serve`;
-      const forcedErrorsLabelA = document.getElementById('label_player_a_forced_errors');
-      if (forcedErrorsLabelA) {
-        forcedErrorsLabelA.textContent = `${firstNameA}'s Forced Errors`;
-        document.getElementById('label_player_b_forced_errors').textContent = `${firstNameB}'s Forced Errors`;
-        document.getElementById('label_player_a_unforced_errors').textContent = `${firstNameA}'s Unforced Errors`;
-        document.getElementById('label_player_b_unforced_errors').textContent = `${firstNameB}'s Unforced Errors`;
-      }
+      // Labels remain simple since they're grouped under player sections
     }
 
-    // Update labels when player names change
     document.getElementById('player_a_name').addEventListener('input', (e) => {
       const playerBName = document.getElementById('player_b_name').value || 'Player B';
       updateLabels(e.target.value || 'Player A', playerBName);
@@ -585,26 +933,149 @@
 
     function formatMetricLabel(metricKey) {
       switch (metricKey) {
-        case 'total_points_won':
-          return 'Total Points Won';
-        case 'total_serves_done':
-          return 'Total Serves Done';
         case 'points_on_serve':
           return 'Points on Serve';
+        case 'forced_errors':
+          return 'Forced Errors';
+        case 'unforced_errors':
+          return 'Unforced Errors';
         default:
-          return 'Total Points Won';
+          return 'Points on Serve';
       }
+    }
+
+    function updatePreviews(data) {
+      // Rally Preview
+      const rallyValue = Number(data.rally_count) || 0;
+      const rallyPreviewValue = document.getElementById('previewRallyValue');
+      if (rallyPreviewValue) {
+        rallyPreviewValue.textContent = rallyValue;
+      }
+
+      // Double Preview
+      const doubleMetric = data.doublebar_metric || 'points_on_serve';
+      const metricLabels = {
+        points_on_serve: 'Points on Serve',
+        forced_errors: 'Forced Errors',
+        unforced_errors: 'Unforced Errors'
+      };
+      const doubleMetricLabel = metricLabels[doubleMetric] || 'Points on Serve';
+      const doubleKeys = {
+        points_on_serve: { a: 'player_a_points_on_serve', b: 'player_b_points_on_serve' },
+        forced_errors: { a: 'player_a_forced_errors', b: 'player_b_forced_errors' },
+        unforced_errors: { a: 'player_a_unforced_errors', b: 'player_b_unforced_errors' }
+      };
+      const keys = doubleKeys[doubleMetric] || doubleKeys.points_on_serve;
+      
+      const previewDoubleMetric = document.getElementById('previewDoubleMetric');
+      const previewDoublePlayerA = document.getElementById('previewDoublePlayerA');
+      const previewDoublePlayerB = document.getElementById('previewDoublePlayerB');
+      const previewDoubleValueA = document.getElementById('previewDoubleValueA');
+      const previewDoubleValueB = document.getElementById('previewDoubleValueB');
+      
+      if (previewDoubleMetric) previewDoubleMetric.textContent = doubleMetricLabel;
+      if (previewDoublePlayerA) previewDoublePlayerA.textContent = data.player_a_name || 'Player A';
+      if (previewDoublePlayerB) previewDoublePlayerB.textContent = data.player_b_name || 'Player B';
+      if (previewDoubleValueA) previewDoubleValueA.textContent = Number(data[keys.a]) || 0;
+      if (previewDoubleValueB) previewDoubleValueB.textContent = Number(data[keys.b]) || 0;
+
+      // Single Player Preview
+      const singleMetric = data.singleplayer_metric || 'points_on_serve';
+      const singlePlayer = data.singleplayer_player === 'b' ? 'b' : 'a';
+      const singleMetricLabel = metricLabels[singleMetric] || 'Points on Serve';
+      const singleKeys = {
+        points_on_serve: { a: 'player_a_points_on_serve', b: 'player_b_points_on_serve' },
+        forced_errors: { a: 'player_a_forced_errors', b: 'player_b_forced_errors' },
+        unforced_errors: { a: 'player_a_unforced_errors', b: 'player_b_unforced_errors' }
+      };
+      const singleKey = singleKeys[singleMetric][singlePlayer];
+      const singlePlayerName = singlePlayer === 'a' 
+        ? (data.player_a_name || 'Player A')
+        : (data.player_b_name || 'Player B');
+      
+      const previewSingleMetric = document.getElementById('previewSingleMetric');
+      const previewSinglePlayer = document.getElementById('previewSinglePlayer');
+      const previewSingleValue = document.getElementById('previewSingleValue');
+      
+      if (previewSingleMetric) previewSingleMetric.textContent = singleMetricLabel;
+      if (previewSinglePlayer) previewSinglePlayer.textContent = singlePlayerName;
+      if (previewSingleValue) previewSingleValue.textContent = Number(data[singleKey]) || 0;
+
+      // Triple Bar Preview
+      const tripleType = data.triplebar_type || 'shotwins';
+      const triplePlayer = data.triplebar_player === 'b' ? 'b' : 'a';
+      const triplePlayerName = triplePlayer === 'a' 
+        ? (data.player_a_name || 'Player A')
+        : (data.player_b_name || 'Player B');
+      
+      const shotWinsKeys = {
+        a: { row1: 'player_a_smash_wins', row2: 'player_a_lob_wins', row3: 'player_a_drive_wins' },
+        b: { row1: 'player_b_smash_wins', row2: 'player_b_lob_wins', row3: 'player_b_drive_wins' }
+      };
+      const errorsKeys = {
+        a: { row1: 'player_a_net_errors', row2: 'player_a_missed_errors', row3: 'player_a_out_errors' },
+        b: { row1: 'player_b_net_errors', row2: 'player_b_missed_errors', row3: 'player_b_out_errors' }
+      };
+      
+      const tripleKeys = tripleType === 'errors' ? errorsKeys[triplePlayer] : shotWinsKeys[triplePlayer];
+      const tripleLabels = tripleType === 'errors' 
+        ? ['Net', 'Missed', 'Out']
+        : ['Smash', 'Lob', 'Drive'];
+      const tripleMetricLabel = tripleType === 'errors' ? 'Errors' : 'Shot Wins';
+      
+      const previewTripleMetric = document.getElementById('previewTripleMetric');
+      const previewTriplePlayer = document.getElementById('previewTriplePlayer');
+      const previewTripleLabel1 = document.getElementById('previewTripleLabel1');
+      const previewTripleLabel2 = document.getElementById('previewTripleLabel2');
+      const previewTripleLabel3 = document.getElementById('previewTripleLabel3');
+      const previewTripleValue1 = document.getElementById('previewTripleValue1');
+      const previewTripleValue2 = document.getElementById('previewTripleValue2');
+      const previewTripleValue3 = document.getElementById('previewTripleValue3');
+      
+      if (previewTripleMetric) previewTripleMetric.textContent = tripleMetricLabel;
+      if (previewTriplePlayer) previewTriplePlayer.textContent = triplePlayerName;
+      if (previewTripleLabel1) previewTripleLabel1.textContent = tripleLabels[0];
+      if (previewTripleLabel2) previewTripleLabel2.textContent = tripleLabels[1];
+      if (previewTripleLabel3) previewTripleLabel3.textContent = tripleLabels[2];
+      if (previewTripleValue1) previewTripleValue1.textContent = Number(data[tripleKeys.row1]) || 0;
+      if (previewTripleValue2) previewTripleValue2.textContent = Number(data[tripleKeys.row2]) || 0;
+      if (previewTripleValue3) previewTripleValue3.textContent = Number(data[tripleKeys.row3]) || 0;
     }
 
     function showStatus(message, isError = false) {
       statusEl.textContent = message;
-      statusEl.style.color = isError ? '#ff6b6b' : 'var(--text-secondary)';
+      statusEl.className = isError ? 'status error' : 'status success';
       if (!message) {
         return;
       }
       setTimeout(() => {
         statusEl.textContent = '';
+        statusEl.className = 'status';
       }, 3000);
+    }
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    
+    function applyDarkMode(isDark) {
+      if (isDark) {
+        document.body.classList.add('dark-mode');
+        darkModeToggle.querySelector('.dark-mode-icon').textContent = '☀️';
+      } else {
+        document.body.classList.remove('dark-mode');
+        darkModeToggle.querySelector('.dark-mode-icon').textContent = '🌙';
+      }
+      localStorage.setItem('darkMode', isDark.toString());
+    }
+    
+    if (darkModeToggle) {
+      applyDarkMode(isDarkMode);
+      
+      darkModeToggle.addEventListener('click', () => {
+        const isCurrentlyDark = document.body.classList.contains('dark-mode');
+        applyDarkMode(!isCurrentlyDark);
+      });
     }
 
     loadState({ force: true });
@@ -615,4 +1086,3 @@
 </body>
 
 </html>
-

@@ -10,7 +10,7 @@
 
 <body class="overlay overlay-metrics">
   <div class="metrics-card board" id="singlePlayerBoard" data-overlay="singleplayer">
-    <div class="metrics-card__header" id="metricTitle">TOTAL POINTS WON SO FAR</div>
+    <div class="metrics-card__header" id="metricTitle">TOTAL POINTS WON</div>
 
     <div class="metrics-card__row">
       <div class="metrics-card__label" id="playerName">Player A</div>
@@ -20,16 +20,6 @@
 
   <script>
     const METRICS = {
-      total_points_won: {
-        title: 'Total Points Won',
-        keyA: 'player_a_total_points_won',
-        keyB: 'player_b_total_points_won'
-      },
-      total_serves_done: {
-        title: 'Total Serves Done',
-        keyA: 'player_a_total_serves_done',
-        keyB: 'player_b_total_serves_done'
-      },
       points_on_serve: {
         title: 'Points on Serve',
         keyA: 'player_a_points_on_serve',
@@ -52,7 +42,7 @@
     const playerNameEl = document.getElementById('playerName');
     const playerValueEl = document.getElementById('playerValue');
 
-    let currentMetricKey = 'total_points_won';
+    let currentMetricKey = 'points_on_serve';
     let currentPlayer = 'a';
     let lastValue = undefined;
     let lastName = '';
@@ -73,7 +63,7 @@
     }
 
     function render(data) {
-      const metricKey = METRICS[data.singleplayer_metric] ? data.singleplayer_metric : 'total_points_won';
+      const metricKey = METRICS[data.singleplayer_metric] ? data.singleplayer_metric : 'points_on_serve';
       const player = data.singleplayer_player === 'b' ? 'b' : 'a';
       
       if (metricKey !== currentMetricKey || player !== currentPlayer) {
@@ -97,7 +87,7 @@
         lastVisibility = isVisible;
       }
 
-      const headerText = `${metric.title.toUpperCase()} SO FAR`;
+      const headerText = metric.title.toUpperCase();
       
       if (headerText !== lastMetricTitle) {
         metricTitle.textContent = headerText;

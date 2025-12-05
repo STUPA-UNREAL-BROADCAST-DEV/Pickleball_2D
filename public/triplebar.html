@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" class="overlay-page">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Triple Bar Metric Overlay</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="overlay overlay-metrics">
+  <div class="metrics-card board" id="tripleBoard" data-overlay="triplebar">
+    <div class="metrics-card__header" id="metricTitle">SHOT WINS</div>
+
+    <div class="metrics-card__row">
+      <div class="metrics-card__label" id="row1Label">Smash</div>
+      <div class="metrics-card__value" id="row1Value">0</div>
+    </div>
+    <div class="metrics-card__row">
+      <div class="metrics-card__label" id="row2Label">Lob</div>
+      <div class="metrics-card__value" id="row2Value">0</div>
+    </div>
+    <div class="metrics-card__row">
+      <div class="metrics-card__label" id="row3Label">Drive</div>
+      <div class="metrics-card__value" id="row3Value">0</div>
+    </div>
+  </div>
+
+  <script>
+    const board = document.getElementById('tripleBoard');
+    const metricTitle = document.getElementById('metricTitle');
+    const row1LabelEl = document.getElementById('row1Label');
+    const row2LabelEl = document.getElementById('row2Label');
+    const row3LabelEl = document.getElementById('row3Label');
+    const row1ValueEl = document.getElementById('row1Value');
+    const row2ValueEl = document.getElementById('row2Value');
+    const row3ValueEl = document.getElementById('row3Value');
+
+    const SHOT_WINS_CONFIG = {
+      labels: ['Smash', 'Lob', 'Drive'],
+      getKeys: (player) => ({
+        row1: player === 'b' ? 'player_b_smash_wins' : 'player_a_smash_wins',
+        row2: player === 'b' ? 'player_b_lob_wins' : 'player_a_lob_wins',
+        row3: player === 'b' ? 'player_b_drive_wins' : 'player_a_drive_wins'
+      }),
+      getHeader: (playerName) => `${playerName.toUpperCase()}'S SHOT WINS`
+    };
+
+    const ERRORS_CONFIG = {
+      labels: ['Net', 'Missed', 'Out'],
+      getKeys: (player) => ({
+        row1: player === 'b' ? 'player_b_net_errors' : 'player_a_net_errors',
+        row2: player === 'b' ? 'player_b_missed_errors' : 'player_a_missed_errors',
+        row3: player === 'b' ? 'player_b_out_errors' : 'player_a_out_errors'
+      }),
+      getHeader: (playerName) => `${playerName.toUpperCase()}'S ERRORS`
+    };
+
+    let currentPlayer = 'a';
+    let currentType = 'shotwins';
+    let lastValues = { row1: undefined, row2: undefined, row3: undefined };
+    let lastName = '';
+    let lastVisibility;
+    let lastMetricTitle;
+    let lastLabels = ['', '', ''];
+
+    async function fetchState() {
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch state');
+        }
+        const data = await response.json();
+        render(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function render(data) {
+      const player = data.triplebar_player === 'b' ? 'b' : 'a';
+      const type = data.triplebar_type === 'errors' ? 'errors' : 'shotwins';
+      
+      if (player !== currentPlayer || type !== currentType) {
+        currentPlayer = player;
+        currentType = type;
+        lastValues = { row1: undefined, row2: undefined, row3: undefined };
+        lastName = '';
+        lastMetricTitle = undefined;
+        lastLabels = ['', '', ''];
+      }
+
+      const isVisible = data.triplebar_visible !== false;
+
+      if (isVisible !== lastVisibility) {
+        board.classList.toggle('is-hidden', !isVisible);
+        if (isVisible) {
+          lastValues = { row1: undefined, row2: undefined, row3: undefined };
+          lastName = '';
+          lastLabels = ['', '', ''];
+          triggerAnimation();
+        }
+        lastVisibility = isVisible;
+      }
+
+      const playerName = currentPlayer === 'b' 
+        ? (data.player_b_name || 'Player B')
+        : (data.player_a_name || 'Player A');
+
+      const config = currentType === 'errors' ? ERRORS_CONFIG : SHOT_WINS_CONFIG;
+      const headerText = config.getHeader(playerName);
+      
+      if (headerText !== lastMetricTitle) {
+        metricTitle.textContent = headerText;
+        lastMetricTitle = headerText;
+      }
+
+      // Update labels if needed
+      if (lastLabels[0] !== config.labels[0]) {
+        row1LabelEl.textContent = config.labels[0];
+        row2LabelEl.textContent = config.labels[1];
+        row3LabelEl.textContent = config.labels[2];
+        lastLabels = [...config.labels];
+      }
+
+      const keys = config.getKeys(currentPlayer);
+      const row1Value = parseNumeric(data[keys.row1]);
+      const row2Value = parseNumeric(data[keys.row2]);
+      const row3Value = parseNumeric(data[keys.row3]);
+
+      if (lastName !== playerName) {
+        lastName = playerName;
+      }
+
+      if (lastValues.row1 !== row1Value) {
+        animateNumber(row1ValueEl, lastValues.row1 ?? 0, row1Value);
+        lastValues.row1 = row1Value;
+      }
+
+      if (lastValues.row2 !== row2Value) {
+        animateNumber(row2ValueEl, lastValues.row2 ?? 0, row2Value);
+        lastValues.row2 = row2Value;
+      }
+
+      if (lastValues.row3 !== row3Value) {
+        animateNumber(row3ValueEl, lastValues.row3 ?? 0, row3Value);
+        lastValues.row3 = row3Value;
+      }
+
+      if ((lastValues.row1 !== row1Value || lastValues.row2 !== row2Value || lastValues.row3 !== row3Value || lastName !== playerName) && lastVisibility !== false) {
+        triggerAnimation();
+      }
+
+      row1ValueEl.textContent = Math.round(row1Value);
+      row2ValueEl.textContent = Math.round(row2Value);
+      row3ValueEl.textContent = Math.round(row3Value);
+    }
+
+    function parseNumeric(value) {
+      const num = Number(value);
+      return Number.isFinite(num) ? Math.round(num) : 0;
+    }
+
+    function animateNumber(el, fromValue, toValue) {
+      const start = Number.isFinite(fromValue) ? fromValue : 0;
+      const end = Number.isFinite(toValue) ? toValue : 0;
+      const duration = 600;
+      const startTime = performance.now();
+
+      function frame(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutCubic(progress);
+        const current = Math.round(start + (end - start) * eased);
+        el.textContent = current;
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function triggerAnimation() {
+      board.classList.remove('animate');
+      void board.offsetWidth;
+      board.classList.add('animate');
+    }
+
+    fetchState();
+    setInterval(fetchState, 300);
+  </script>
+</body>
+
+</html>
+

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" class="overlay-page">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Errors Comparison Overlay</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body class="overlay overlay-metrics">
+  <div class="metrics-card board" id="errorsBoard" data-overlay="errorscomparison">
+    <div class="metrics-card__header" id="metricTitle">FORCED VS UNFORCED ERRORS</div>
+
+    <div class="metrics-card__row">
+      <div class="metrics-card__label" id="playerName">Player A</div>
+      <div class="metrics-card__value" id="playerValue">0</div>
+    </div>
+    <div class="metrics-card__row">
+      <div class="metrics-card__label" id="forcedLabel">Forced Errors</div>
+      <div class="metrics-card__value" id="forcedValue">0</div>
+    </div>
+    <div class="metrics-card__row">
+      <div class="metrics-card__label" id="unforcedLabel">Unforced Errors</div>
+      <div class="metrics-card__value" id="unforcedValue">0</div>
+    </div>
+  </div>
+
+  <script>
+    const board = document.getElementById('errorsBoard');
+    const metricTitle = document.getElementById('metricTitle');
+    const playerNameEl = document.getElementById('playerName');
+    const playerValueEl = document.getElementById('playerValue');
+    const forcedLabelEl = document.getElementById('forcedLabel');
+    const forcedValueEl = document.getElementById('forcedValue');
+    const unforcedLabelEl = document.getElementById('unforcedLabel');
+    const unforcedValueEl = document.getElementById('unforcedValue');
+
+    let currentPlayer = 'a';
+    let lastValues = { forced: undefined, unforced: undefined, name: '' };
+    let lastVisibility;
+
+    async function fetchState() {
+      try {
+        const response = await fetch('/api/state', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch state');
+        }
+        const data = await response.json();
+        render(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function render(data) {
+      const player = data.errorscomparison_player === 'b' ? 'b' : 'a';
+      if (player !== currentPlayer) {
+        currentPlayer = player;
+        lastValues = { forced: undefined, unforced: undefined, name: '' };
+      }
+
+      const isVisible = data.errorscomparison_visible !== false;
+
+      if (isVisible !== lastVisibility) {
+        board.classList.toggle('is-hidden', !isVisible);
+        if (isVisible) {
+          lastValues = { forced: undefined, unforced: undefined, name: '' };
+          triggerAnimation();
+        }
+        lastVisibility = isVisible;
+      }
+
+      const playerName = player === 'a' 
+        ? (data.player_a_name || 'Player A')
+        : (data.player_b_name || 'Player B');
+      
+      const forcedKey = player === 'a' ? 'player_a_forced_errors' : 'player_b_forced_errors';
+      const unforcedKey = player === 'a' ? 'player_a_unforced_errors' : 'player_b_unforced_errors';
+
+      const forcedValue = parseNumeric(data[forcedKey]);
+      const unforcedValue = parseNumeric(data[unforcedKey]);
+
+      if (lastValues.name !== playerName) {
+        playerNameEl.textContent = playerName;
+        playerValueEl.textContent = forcedValue + unforcedValue; // Total errors
+      }
+
+      if (lastValues.forced !== forcedValue) {
+        animateNumber(forcedValueEl, lastValues.forced ?? 0, forcedValue);
+      }
+
+      if (lastValues.unforced !== unforcedValue) {
+        animateNumber(unforcedValueEl, lastValues.unforced ?? 0, unforcedValue);
+      }
+
+      // Update total
+      const totalErrors = forcedValue + unforcedValue;
+      if (playerValueEl.textContent !== String(totalErrors)) {
+        animateNumber(playerValueEl, parseNumeric(playerValueEl.textContent), totalErrors);
+      }
+
+      const changed =
+        lastValues.forced !== forcedValue ||
+        lastValues.unforced !== unforcedValue ||
+        lastValues.name !== playerName;
+
+      if (changed && lastVisibility !== false) {
+        triggerAnimation();
+      }
+
+      forcedValueEl.textContent = Math.round(forcedValue);
+      unforcedValueEl.textContent = Math.round(unforcedValue);
+      playerValueEl.textContent = Math.round(totalErrors);
+
+      lastValues = { forced: forcedValue, unforced: unforcedValue, name: playerName };
+    }
+
+    function parseNumeric(value) {
+      const num = Number(value);
+      return Number.isFinite(num) ? Math.round(num) : 0;
+    }
+
+    function animateNumber(el, fromValue, toValue) {
+      const start = Number.isFinite(fromValue) ? fromValue : 0;
+      const end = Number.isFinite(toValue) ? toValue : 0;
+      const duration = 600;
+      const startTime = performance.now();
+
+      function frame(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutCubic(progress);
+        const current = Math.round(start + (end - start) * eased);
+        el.textContent = current;
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function triggerAnimation() {
+      board.classList.remove('animate');
+      void board.offsetWidth;
+      board.classList.add('animate');
+    }
+
+    fetchState();
+    setInterval(fetchState, 300);
+  </script>
+</body>
+
+</html>
+
