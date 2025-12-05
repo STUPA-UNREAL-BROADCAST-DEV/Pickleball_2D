@@ -19,43 +19,51 @@
     <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
       <a href="/singlebar" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Last Rally Overlay</a>
       <a href="/doublebar" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Metric Overlay</a>
+      <a href="/singleplayer" target="_blank" style="color: #6f7dff; text-decoration: none;">Open Single Player Overlay</a>
     </div>
+
+    <section class="toggle-section">
+      <h2>Game Selection</h2>
+      <div style="margin-bottom: 1rem;">
+        <label for="selected_game">Select Game:</label>
+        <select id="selected_game" name="selected_game" style="width: 100%; padding: 0.65rem 0.75rem; border-radius: 12px; border: 1px solid rgba(23, 37, 63, 0.18); font-size: 0.92rem; background: var(--white); color: var(--navy); margin-top: 0.35rem;">
+          <option value="1">Game 1</option>
+          <option value="2">Game 2</option>
+          <option value="3">Game 3</option>
+          <option value="4">Game 4</option>
+        </select>
+      </div>
+    </section>
 
     <section class="toggle-section">
       <h2>Overlay Visibility</h2>
       <div class="toggle-row" id="visibilityControls">
-        <button type="button" class="toggle-button" data-overlay="single" data-visible="true">Single In</button>
-        <button type="button" class="toggle-button" data-overlay="single" data-visible="false">Single Out</button>
-        <button type="button" class="toggle-button" data-overlay="double" data-visible="true">Double In</button>
-        <button type="button" class="toggle-button" data-overlay="double" data-visible="false">Double Out</button>
+        <button type="button" class="toggle-button" data-overlay="single" style="--overlay-color: var(--rally-color);">Single</button>
+        <button type="button" class="toggle-button" data-overlay="double" style="--overlay-color: var(--doublebar-color);">Double</button>
+        <button type="button" class="toggle-button" data-overlay="singleplayer" style="--overlay-color: var(--singleplayer-color);">Single Player</button>
       </div>
     </section>
 
     <section class="toggle-section">
       <h2>Quick Animations</h2>
       <div class="toggle-row" id="quickControls">
-        <button type="button" class="toggle-button action-button" data-type="rally" data-visible="true">Rally In</button>
-        <button type="button" class="toggle-button action-button" data-type="rally" data-visible="false">Rally Out</button>
-        <button type="button" class="toggle-button action-button" data-type="serve_success" data-visible="true">Serve Success In</button>
-        <button type="button" class="toggle-button action-button" data-type="serve_success" data-visible="false">Serve Success Out</button>
-        <button type="button" class="toggle-button action-button" data-type="forehand_wins" data-visible="true">Forehand In</button>
-        <button type="button" class="toggle-button action-button" data-type="forehand_wins" data-visible="false">Forehand Out</button>
-        <button type="button" class="toggle-button action-button" data-type="backhand_wins" data-visible="true">Backhand In</button>
-        <button type="button" class="toggle-button action-button" data-type="backhand_wins" data-visible="false">Backhand Out</button>
+        <button type="button" class="toggle-button action-button" data-type="rally">Rally</button>
+        <button type="button" class="toggle-button action-button" data-type="total_points_won">Total Points Won</button>
+        <button type="button" class="toggle-button action-button" data-type="total_serves_done">Total Serves Done</button>
+        <button type="button" class="toggle-button action-button" data-type="points_on_serve">Points on Serve</button>
+      </div>
+    </section>
+
+    <section class="toggle-section">
+      <h2>Single Player Controls</h2>
+      <div class="toggle-row" id="singlePlayerControls">
+        <!-- Buttons will be dynamically generated -->
       </div>
     </section>
 
     <form id="stateForm">
       <div class="form-grid">
-        <div>
-          <label for="set_label">Set Label</label>
-          <input type="text" id="set_label" name="set_label" placeholder="Set 1" />
-        </div>
-        <div>
-          <label for="current_game">Current Game</label>
-          <input type="number" id="current_game" name="current_game" min="0" />
-        </div>
-        <div>
+        <div style="grid-column: 1 / -1;">
           <label for="rally_count">Rally Count</label>
           <input type="number" id="rally_count" name="rally_count" min="0" />
         </div>
@@ -68,28 +76,44 @@
           <input type="text" id="player_b_name" name="player_b_name" />
         </div>
         <div>
-          <label for="player_a_serve_success">Player A Serve Success (%)</label>
-          <input type="number" id="player_a_serve_success" name="player_a_serve_success" min="0" max="100" />
+          <label for="player_a_total_points_won" id="label_player_a_total_points_won">Player A Total Points Won</label>
+          <input type="number" id="player_a_total_points_won" name="player_a_total_points_won" min="0" />
         </div>
         <div>
-          <label for="player_b_serve_success">Player B Serve Success (%)</label>
-          <input type="number" id="player_b_serve_success" name="player_b_serve_success" min="0" max="100" />
+          <label for="player_b_total_points_won" id="label_player_b_total_points_won">Player B Total Points Won</label>
+          <input type="number" id="player_b_total_points_won" name="player_b_total_points_won" min="0" />
         </div>
         <div>
-          <label for="player_a_forehand_wins">Player A Forehand Wins (%)</label>
-          <input type="number" id="player_a_forehand_wins" name="player_a_forehand_wins" min="0" max="100" />
+          <label for="player_a_total_serves_done" id="label_player_a_total_serves_done">Player A Total Serves Done</label>
+          <input type="number" id="player_a_total_serves_done" name="player_a_total_serves_done" min="0" />
         </div>
         <div>
-          <label for="player_b_forehand_wins">Player B Forehand Wins (%)</label>
-          <input type="number" id="player_b_forehand_wins" name="player_b_forehand_wins" min="0" max="100" />
+          <label for="player_b_total_serves_done" id="label_player_b_total_serves_done">Player B Total Serves Done</label>
+          <input type="number" id="player_b_total_serves_done" name="player_b_total_serves_done" min="0" />
         </div>
         <div>
-          <label for="player_a_backhand_wins">Player A Backhand Wins (%)</label>
-          <input type="number" id="player_a_backhand_wins" name="player_a_backhand_wins" min="0" max="100" />
+          <label for="player_a_points_on_serve" id="label_player_a_points_on_serve">Player A Points on Serve</label>
+          <input type="number" id="player_a_points_on_serve" name="player_a_points_on_serve" min="0" />
         </div>
         <div>
-          <label for="player_b_backhand_wins">Player B Backhand Wins (%)</label>
-          <input type="number" id="player_b_backhand_wins" name="player_b_backhand_wins" min="0" max="100" />
+          <label for="player_b_points_on_serve" id="label_player_b_points_on_serve">Player B Points on Serve</label>
+          <input type="number" id="player_b_points_on_serve" name="player_b_points_on_serve" min="0" />
+        </div>
+        <div>
+          <label for="player_a_forced_errors" id="label_player_a_forced_errors">Player A Forced Errors</label>
+          <input type="number" id="player_a_forced_errors" name="player_a_forced_errors" min="0" />
+        </div>
+        <div>
+          <label for="player_b_forced_errors" id="label_player_b_forced_errors">Player B Forced Errors</label>
+          <input type="number" id="player_b_forced_errors" name="player_b_forced_errors" min="0" />
+        </div>
+        <div>
+          <label for="player_a_unforced_errors" id="label_player_a_unforced_errors">Player A Unforced Errors</label>
+          <input type="number" id="player_a_unforced_errors" name="player_a_unforced_errors" min="0" />
+        </div>
+        <div>
+          <label for="player_b_unforced_errors" id="label_player_b_unforced_errors">Player B Unforced Errors</label>
+          <input type="number" id="player_b_unforced_errors" name="player_b_unforced_errors" min="0" />
         </div>
       </div>
       <button type="submit" class="primary">Push Update</button>
@@ -100,30 +124,37 @@
 
   <script>
     const numericFields = [
-      'current_game',
       'rally_count',
-      'player_a_serve_success',
-      'player_b_serve_success',
-      'player_a_forehand_wins',
-      'player_b_forehand_wins',
-      'player_a_backhand_wins',
-      'player_b_backhand_wins'
+      'player_a_total_points_won',
+      'player_b_total_points_won',
+      'player_a_total_serves_done',
+      'player_b_total_serves_done',
+      'player_a_points_on_serve',
+      'player_b_points_on_serve',
+      'player_a_forced_errors',
+      'player_b_forced_errors',
+      'player_a_unforced_errors',
+      'player_b_unforced_errors'
     ];
 
     const numericFieldSet = new Set(numericFields);
-    const METRIC_KEYS = ['serve_success', 'forehand_wins', 'backhand_wins'];
+    const METRIC_KEYS = ['total_points_won', 'total_serves_done', 'points_on_serve', 'forced_errors', 'unforced_errors'];
 
     const form = document.getElementById('stateForm');
     const statusEl = document.getElementById('status');
     const visibilityButtons = document.querySelectorAll('#visibilityControls .toggle-button');
     const actionButtons = document.querySelectorAll('.action-button');
+    const gameSelect = document.getElementById('selected_game');
 
     const visibilityState = {
       single: true,
-      double: true
+      double: true,
+      singleplayer: true
     };
 
-    let metricState = 'serve_success';
+    let metricState = 'total_points_won';
+    let singlePlayerMetricState = 'total_points_won';
+    let singlePlayerState = 'a';
     let isSyncing = false;
 
     async function loadState(options = {}) {
@@ -141,6 +172,11 @@
         const data = await response.json();
 
         Object.entries(data).forEach(([key, value]) => {
+          if (key === 'selected_game') {
+            gameSelect.value = value || '1';
+            return;
+          }
+
           const input = form.elements.namedItem(key);
           if (!input || document.activeElement === input) {
             return;
@@ -155,10 +191,19 @@
 
         visibilityState.single = data.singlebar_visible !== false;
         visibilityState.double = data.doublebar_visible !== false;
+        visibilityState.singleplayer = data.singleplayer_visible !== false;
         metricState = data.doublebar_metric && METRIC_KEYS.includes(data.doublebar_metric)
           ? data.doublebar_metric
-          : 'serve_success';
+          : 'total_points_won';
+        singlePlayerMetricState = data.singleplayer_metric && METRIC_KEYS.includes(data.singleplayer_metric)
+          ? data.singleplayer_metric
+          : 'total_points_won';
+        singlePlayerState = data.singleplayer_player === 'b' ? 'b' : 'a';
 
+        const playerAName = data.player_a_name || 'Player A';
+        const playerBName = data.player_b_name || 'Player B';
+        updateLabels(playerAName, playerBName);
+        updateSinglePlayerButtons(playerAName, playerBName);
         updateVisibilityButtons();
         updateActionButtons();
 
@@ -173,6 +218,14 @@
         isSyncing = false;
       }
     }
+
+    gameSelect.addEventListener('change', async () => {
+      const gameNumber = parseInt(gameSelect.value, 10);
+      const succeeded = await pushUpdate({ selected_game: gameNumber }, `Game ${gameNumber} selected.`);
+      if (succeeded) {
+        await loadState({ force: true, silent: true });
+      }
+    });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -200,23 +253,25 @@
     visibilityButtons.forEach((button) => {
       button.addEventListener('click', async () => {
         const overlay = button.getAttribute('data-overlay');
-        const visibleAttr = button.getAttribute('data-visible');
-        if (!overlay || (overlay !== 'single' && overlay !== 'double')) {
+        if (!overlay || (overlay !== 'single' && overlay !== 'double' && overlay !== 'singleplayer')) {
           return;
         }
-        const isVisible = visibleAttr === 'true';
-        if (visibilityState[overlay] === isVisible) {
-          return;
+        const isVisible = !visibilityState[overlay];
+        let payload = {};
+        
+        if (overlay === 'single') {
+          payload = { singlebar_visible: isVisible };
+        } else if (overlay === 'double') {
+          payload = { doublebar_visible: isVisible };
+        } else if (overlay === 'singleplayer') {
+          payload = { singleplayer_visible: isVisible };
         }
-        const payload = overlay === 'single'
-          ? { singlebar_visible: isVisible }
-          : { doublebar_visible: isVisible };
 
         visibilityState[overlay] = isVisible;
         updateVisibilityButtons();
         const succeeded = await pushUpdate(
           payload,
-          `${overlay === 'single' ? 'Single' : 'Double'} overlay ${isVisible ? 'animated in' : 'taken out'}.`
+          `${overlay === 'single' ? 'Single' : overlay === 'double' ? 'Double' : 'Single Player'} overlay ${isVisible ? 'animated in' : 'taken out'}.`
         );
 
         if (!succeeded) {
@@ -224,6 +279,9 @@
           updateVisibilityButtons();
         }
         updateActionButtons();
+        if (typeof updateSinglePlayerButtonStates === 'function') {
+          updateSinglePlayerButtonStates();
+        }
 
         if (succeeded) {
           await loadState({ force: true, silent: true });
@@ -234,12 +292,9 @@
     actionButtons.forEach((button) => {
       button.addEventListener('click', async () => {
         const type = button.getAttribute('data-type');
-        const isVisible = button.getAttribute('data-visible') === 'true';
 
         if (type === 'rally') {
-          if (visibilityState.single === isVisible) {
-            return;
-          }
+          const isVisible = !visibilityState.single;
           visibilityState.single = isVisible;
           updateVisibilityButtons();
           updateActionButtons();
@@ -261,10 +316,25 @@
           return;
         }
 
-        if (isVisible) {
-          if (visibilityState.double && metricState === type) {
-            return;
+        // For metrics, toggle between showing this metric or hiding
+        if (visibilityState.double && metricState === type) {
+          // Currently showing this metric, so hide it
+          visibilityState.double = false;
+          updateVisibilityButtons();
+          updateActionButtons();
+          const succeeded = await pushUpdate(
+            { doublebar_visible: false },
+            `${formatMetricLabel(type)} overlay taken out.`
+          );
+          if (!succeeded) {
+            visibilityState.double = true;
+            updateVisibilityButtons();
+            updateActionButtons();
+          } else {
+            await loadState({ force: true, silent: true });
           }
+        } else {
+          // Show this metric
           const previousMetric = metricState;
           const previousVisibility = visibilityState.double;
           metricState = type;
@@ -283,25 +353,6 @@
           } else {
             await loadState({ force: true, silent: true });
           }
-        } else {
-          if (!visibilityState.double) {
-            return;
-          }
-          const previousVisibility = visibilityState.double;
-          visibilityState.double = false;
-          updateVisibilityButtons();
-          updateActionButtons();
-          const succeeded = await pushUpdate(
-            { doublebar_visible: false },
-            `${formatMetricLabel(metricState)} overlay taken out.`
-          );
-          if (!succeeded) {
-            visibilityState.double = previousVisibility;
-            updateVisibilityButtons();
-            updateActionButtons();
-          } else {
-            await loadState({ force: true, silent: true });
-          }
         }
       });
     });
@@ -309,9 +360,7 @@
     function updateVisibilityButtons() {
       visibilityButtons.forEach((button) => {
         const overlay = button.getAttribute('data-overlay');
-        const visibleAttr = button.getAttribute('data-visible');
-        const isVisible = visibleAttr === 'true';
-        const active = overlay && visibilityState[overlay] === isVisible;
+        const active = overlay && visibilityState[overlay] === true;
         button.classList.toggle('active', active);
       });
     }
@@ -319,21 +368,161 @@
     function updateActionButtons() {
       actionButtons.forEach((button) => {
         const type = button.getAttribute('data-type');
-        const isVisible = button.getAttribute('data-visible') === 'true';
         let active = false;
 
         if (type === 'rally') {
-          active = visibilityState.single === isVisible;
+          active = visibilityState.single === true;
         } else if (METRIC_KEYS.includes(type)) {
-          if (isVisible) {
-            active = visibilityState.double && metricState === type;
-          } else {
-            active = !visibilityState.double && metricState === type;
-          }
+          active = visibilityState.double && metricState === type;
         }
 
         button.classList.toggle('active', active);
       });
+    }
+
+    const singlePlayerControlsContainer = document.getElementById('singlePlayerControls');
+    const METRIC_LABELS = {
+      total_points_won: 'Total Points Won',
+      total_serves_done: 'Total Serves Done',
+      points_on_serve: 'Points on Serve',
+      forced_errors: 'Forced Errors',
+      unforced_errors: 'Unforced Errors'
+    };
+
+    function extractFirstName(fullName) {
+      if (!fullName || fullName === 'Player A' || fullName === 'Player B') {
+        return fullName;
+      }
+      return fullName.split(/[\s\/]+/)[0];
+    }
+
+    function updateSinglePlayerButtons(playerAName, playerBName) {
+      if (!singlePlayerControlsContainer) return;
+      
+      const firstNameA = extractFirstName(playerAName);
+      const firstNameB = extractFirstName(playerBName);
+      
+      // Clear existing buttons
+      singlePlayerControlsContainer.innerHTML = '';
+      
+      // Create 10 buttons: 5 metrics × 2 players
+      const metrics = ['total_points_won', 'total_serves_done', 'points_on_serve', 'forced_errors', 'unforced_errors'];
+      
+      metrics.forEach(metric => {
+        // Player A button
+        const buttonA = document.createElement('button');
+        buttonA.type = 'button';
+        buttonA.className = 'toggle-button action-button';
+        buttonA.setAttribute('data-type', `singleplayer_${metric}`);
+        buttonA.setAttribute('data-player', 'a');
+        buttonA.textContent = `${firstNameA}'s ${METRIC_LABELS[metric]}`;
+        buttonA.style.setProperty('--overlay-color', 'var(--singleplayer-color)');
+        singlePlayerControlsContainer.appendChild(buttonA);
+        
+        // Player B button
+        const buttonB = document.createElement('button');
+        buttonB.type = 'button';
+        buttonB.className = 'toggle-button action-button';
+        buttonB.setAttribute('data-type', `singleplayer_${metric}`);
+        buttonB.setAttribute('data-player', 'b');
+        buttonB.textContent = `${firstNameB}'s ${METRIC_LABELS[metric]}`;
+        buttonB.style.setProperty('--overlay-color', 'var(--singleplayer-color)');
+        singlePlayerControlsContainer.appendChild(buttonB);
+      });
+      
+      // Re-attach event listeners
+      attachSinglePlayerButtonListeners();
+      updateSinglePlayerButtonStates();
+    }
+
+    function updateSinglePlayerButtonStates() {
+      if (!singlePlayerControlsContainer) return;
+      const buttons = singlePlayerControlsContainer.querySelectorAll('.action-button');
+      buttons.forEach((button) => {
+        const type = button.getAttribute('data-type');
+        const player = button.getAttribute('data-player');
+        let active = false;
+
+        if (type && type.startsWith('singleplayer_')) {
+          const metric = type.replace('singleplayer_', '');
+          active = visibilityState.singleplayer && 
+                   singlePlayerMetricState === metric && 
+                   singlePlayerState === player;
+        }
+
+        button.classList.toggle('active', active);
+      });
+    }
+
+    function attachSinglePlayerButtonListeners() {
+      if (!singlePlayerControlsContainer) return;
+      const buttons = singlePlayerControlsContainer.querySelectorAll('.action-button');
+      buttons.forEach((button) => {
+        // Remove existing listeners by cloning
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async () => {
+          const type = newButton.getAttribute('data-type');
+          const player = newButton.getAttribute('data-player');
+          
+          if (!type || !type.startsWith('singleplayer_')) {
+            return;
+          }
+
+          const metric = type.replace('singleplayer_', '');
+          const playerName = player === 'a' 
+            ? (document.getElementById('player_a_name')?.value || 'Player A')
+            : (document.getElementById('player_b_name')?.value || 'Player B');
+          const firstName = extractFirstName(playerName);
+          
+          if (visibilityState.singleplayer && singlePlayerMetricState === metric && singlePlayerState === player) {
+            // Currently showing this exact combination, so hide it
+            visibilityState.singleplayer = false;
+            updateVisibilityButtons();
+            updateSinglePlayerButtonStates();
+            const succeeded = await pushUpdate(
+              { singleplayer_visible: false },
+              `${firstName}'s ${METRIC_LABELS[metric]} overlay taken out.`
+            );
+            if (!succeeded) {
+              visibilityState.singleplayer = true;
+              updateVisibilityButtons();
+              updateSinglePlayerButtonStates();
+            } else {
+              await loadState({ force: true, silent: true });
+            }
+          } else {
+            // Show this metric for this player
+            const previousMetric = singlePlayerMetricState;
+            const previousPlayer = singlePlayerState;
+            const previousVisibility = visibilityState.singleplayer;
+            singlePlayerMetricState = metric;
+            singlePlayerState = player;
+            visibilityState.singleplayer = true;
+            updateVisibilityButtons();
+            updateSinglePlayerButtonStates();
+            const succeeded = await pushUpdate(
+              { singleplayer_visible: true, singleplayer_metric: metric, singleplayer_player: player },
+              `${firstName}'s ${METRIC_LABELS[metric]} overlay animated in.`
+            );
+            if (!succeeded) {
+              singlePlayerMetricState = previousMetric;
+              singlePlayerState = previousPlayer;
+              visibilityState.singleplayer = previousVisibility;
+              updateVisibilityButtons();
+              updateSinglePlayerButtonStates();
+            } else {
+              await loadState({ force: true, silent: true });
+            }
+          }
+        });
+      });
+    }
+
+    // Initialize buttons on page load
+    if (singlePlayerControlsContainer) {
+      updateSinglePlayerButtons('Player A', 'Player B');
     }
 
     async function pushUpdate(payload, successMessage) {
@@ -357,15 +546,53 @@
       }
     }
 
+    function extractFirstName(fullName) {
+      if (!fullName || fullName === 'Player A' || fullName === 'Player B') {
+        return fullName;
+      }
+      return fullName.split(/[\s\/]+/)[0];
+    }
+
+    function updateLabels(playerAName, playerBName) {
+      const firstNameA = extractFirstName(playerAName);
+      const firstNameB = extractFirstName(playerBName);
+
+      document.getElementById('label_player_a_total_points_won').textContent = `${firstNameA}'s Total Points Won`;
+      document.getElementById('label_player_b_total_points_won').textContent = `${firstNameB}'s Total Points Won`;
+      document.getElementById('label_player_a_total_serves_done').textContent = `${firstNameA}'s Total Serves Done`;
+      document.getElementById('label_player_b_total_serves_done').textContent = `${firstNameB}'s Total Serves Done`;
+      document.getElementById('label_player_a_points_on_serve').textContent = `${firstNameA}'s Points on Serve`;
+      document.getElementById('label_player_b_points_on_serve').textContent = `${firstNameB}'s Points on Serve`;
+      const forcedErrorsLabelA = document.getElementById('label_player_a_forced_errors');
+      if (forcedErrorsLabelA) {
+        forcedErrorsLabelA.textContent = `${firstNameA}'s Forced Errors`;
+        document.getElementById('label_player_b_forced_errors').textContent = `${firstNameB}'s Forced Errors`;
+        document.getElementById('label_player_a_unforced_errors').textContent = `${firstNameA}'s Unforced Errors`;
+        document.getElementById('label_player_b_unforced_errors').textContent = `${firstNameB}'s Unforced Errors`;
+      }
+    }
+
+    // Update labels when player names change
+    document.getElementById('player_a_name').addEventListener('input', (e) => {
+      const playerBName = document.getElementById('player_b_name').value || 'Player B';
+      updateLabels(e.target.value || 'Player A', playerBName);
+    });
+
+    document.getElementById('player_b_name').addEventListener('input', (e) => {
+      const playerAName = document.getElementById('player_a_name').value || 'Player A';
+      updateLabels(playerAName, e.target.value || 'Player B');
+    });
+
     function formatMetricLabel(metricKey) {
       switch (metricKey) {
-        case 'forehand_wins':
-          return 'Forehand';
-        case 'backhand_wins':
-          return 'Backhand';
-        case 'serve_success':
+        case 'total_points_won':
+          return 'Total Points Won';
+        case 'total_serves_done':
+          return 'Total Serves Done';
+        case 'points_on_serve':
+          return 'Points on Serve';
         default:
-          return 'Serve Success';
+          return 'Total Points Won';
       }
     }
 

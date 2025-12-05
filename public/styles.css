@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap');
 
 :root {
   --navy: #17253f;
@@ -8,6 +9,15 @@
   --muted-text: #6c778f;
   --panel-border: rgba(23, 37, 63, 0.16);
   --font: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --overlay-font: 'Nunito Sans', 'Arial', sans-serif;
+  /* Overlay colors */
+  --rally-color: #3b82f6;
+  --doublebar-color: #10b981;
+  --singleplayer-color: #f59e0b;
+  /* Scorebug colors */
+  --scorebug-header-bg: #6b7d47;
+  --scorebug-dark-blue: #1a2e5c;
+  --scorebug-white: #ffffff;
 }
 
 * {
@@ -82,6 +92,7 @@ body.overlay.overlay-metrics {
   display: inline-flex;
   gap: 5px;
   border-radius: 0px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .rally-chip.board {
@@ -97,11 +108,13 @@ body.overlay.overlay-metrics {
   padding: 0 1.1rem;
   background: var(--white);
   color: var(--navy);
+  font-family: var(--overlay-font);
   font-size: 22px;
   font-weight: 850;
   letter-spacing: -0.6px;
   text-transform: uppercase;
   white-space: nowrap;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .rally-chip__value {
@@ -109,22 +122,24 @@ body.overlay.overlay-metrics {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--navy);
+  background: var(--scorebug-dark-blue);
   color: var(--white);
+  font-family: var(--overlay-font);
   font-size: 38px;
-  font-weight: 700;
+  font-weight: bold;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 /* Metrics card */
 
 .metrics-card {
-  min-width: 375px;
-  width: auto;
+  width: 375px;
   display: inline-flex;
   flex-direction: column;
   gap: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .metrics-card.board {
@@ -134,26 +149,32 @@ body.overlay.overlay-metrics {
 }
 
 .metrics-card__header {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: flex-start;
-  min-width: 375px;
+  width: 100%;
   height: 36px;
   padding: 0 18px;
-  background: rgba(8, 8, 8, 0.85);
+  background: var(--scorebug-header-bg);
   color: var(--white);
+  font-family: var(--overlay-font);
   font-size: 18px;
   font-weight: 600;
   letter-spacing: 0;
   text-transform: uppercase;
   border-radius: 0px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .metrics-card__row {
-  display: inline-flex;
+  display: flex;
   align-items: stretch;
-  min-width: 375px;
+  width: 100%;
   gap: 5px;
+}
+
+.metrics-card__row:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .metrics-card__label {
@@ -161,15 +182,19 @@ body.overlay.overlay-metrics {
   display: flex;
   align-items: center;
   padding: 0.35rem 18px;
-  background: var(--white);
-  color: var(--navy);
+  background: var(--scorebug-white);
+  color: var(--scorebug-dark-blue);
+  font-family: var(--overlay-font);
   font-size: 22px;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: -0.6px;
   text-transform: uppercase;
   border-radius: 0px;
   white-space: normal;
+  word-wrap: break-word;
   word-break: break-word;
+  min-width: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .metrics-card__value {
@@ -177,13 +202,15 @@ body.overlay.overlay-metrics {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--navy);
+  background: var(--scorebug-dark-blue);
   color: var(--white);
+  font-family: var(--overlay-font);
   font-size: 34px;
-  font-weight: 700;
+  font-weight: bold;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
   border-radius: 0px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 /* Controller */
@@ -247,27 +274,36 @@ body.overlay.overlay-metrics {
 .toggle-button {
   padding: 0.5rem 1.2rem;
   border-radius: 999px;
-  border: 1px solid rgba(23, 37, 63, 0.15);
-  background: #eef0ff;
-  color: var(--navy);
+  border: 1px solid #1a1a1a;
+  background: #1a1a1a;
+  color: var(--white);
   font-weight: 600;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .toggle-button:hover {
-  background: rgba(58, 73, 249, 0.18);
-  color: var(--navy);
   transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .toggle-button.active {
-  background: var(--navy);
+  background: #22c55e;
   color: var(--white);
-  border-color: var(--navy);
+  border-color: #22c55e;
+}
+
+.toggle-button[data-overlay].active {
+  background: var(--overlay-color, #22c55e);
+  border-color: var(--overlay-color, #22c55e);
+}
+
+.action-button.active[style*="--overlay-color"] {
+  background: var(--overlay-color, #22c55e);
+  border-color: var(--overlay-color, #22c55e);
 }
 
 .toggle-button[data-overlay],
@@ -278,7 +314,7 @@ body.overlay.overlay-metrics {
 .form-grid {
   display: grid;
   gap: 1.2rem;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
 }
 
 label {

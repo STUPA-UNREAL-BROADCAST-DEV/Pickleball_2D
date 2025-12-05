@@ -4,21 +4,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Double Metric Overlay</title>
+  <title>Single Player Metric Overlay</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 
 <body class="overlay overlay-metrics">
-  <div class="metrics-card board" id="doubleBoard" data-overlay="doublebar">
+  <div class="metrics-card board" id="singlePlayerBoard" data-overlay="singleplayer">
     <div class="metrics-card__header" id="metricTitle">TOTAL POINTS WON SO FAR</div>
 
     <div class="metrics-card__row">
-      <div class="metrics-card__label metrics-card__label--player-a" id="playerAName">Player A</div>
-      <div class="metrics-card__value metrics-card__value--player-a" id="playerAValue">0</div>
-    </div>
-    <div class="metrics-card__row">
-      <div class="metrics-card__label metrics-card__label--player-b" id="playerBName">Player B</div>
-      <div class="metrics-card__value metrics-card__value--player-b" id="playerBValue">0</div>
+      <div class="metrics-card__label" id="playerName">Player A</div>
+      <div class="metrics-card__value" id="playerValue">0</div>
     </div>
   </div>
 
@@ -38,18 +34,28 @@
         title: 'Points on Serve',
         keyA: 'player_a_points_on_serve',
         keyB: 'player_b_points_on_serve'
+      },
+      forced_errors: {
+        title: 'Forced Errors',
+        keyA: 'player_a_forced_errors',
+        keyB: 'player_b_forced_errors'
+      },
+      unforced_errors: {
+        title: 'Unforced Errors',
+        keyA: 'player_a_unforced_errors',
+        keyB: 'player_b_unforced_errors'
       }
     };
 
-    const board = document.getElementById('doubleBoard');
+    const board = document.getElementById('singlePlayerBoard');
     const metricTitle = document.getElementById('metricTitle');
-    const playerANameEl = document.getElementById('playerAName');
-    const playerBNameEl = document.getElementById('playerBName');
-    const playerAValueEl = document.getElementById('playerAValue');
-    const playerBValueEl = document.getElementById('playerBValue');
+    const playerNameEl = document.getElementById('playerName');
+    const playerValueEl = document.getElementById('playerValue');
 
     let currentMetricKey = 'total_points_won';
-    let lastValues = { keyA: undefined, keyB: undefined, names: ['', ''] };
+    let currentPlayer = 'a';
+    let lastValue = undefined;
+    let lastName = '';
     let lastVisibility;
     let lastMetricTitle;
 
@@ -67,67 +73,59 @@
     }
 
     function render(data) {
-      const metricKey = METRICS[data.doublebar_metric] ? data.doublebar_metric : 'total_points_won';
-      if (metricKey !== currentMetricKey) {
+      const metricKey = METRICS[data.singleplayer_metric] ? data.singleplayer_metric : 'total_points_won';
+      const player = data.singleplayer_player === 'b' ? 'b' : 'a';
+      
+      if (metricKey !== currentMetricKey || player !== currentPlayer) {
         currentMetricKey = metricKey;
-        lastValues = { keyA: undefined, keyB: undefined, names: lastValues.names };
+        currentPlayer = player;
+        lastValue = undefined;
+        lastName = '';
         lastMetricTitle = undefined;
       }
 
       const metric = METRICS[currentMetricKey];
-      const isVisible = data.doublebar_visible !== false;
+      const isVisible = data.singleplayer_visible !== false;
 
       if (isVisible !== lastVisibility) {
         board.classList.toggle('is-hidden', !isVisible);
         if (isVisible) {
-          lastValues = { keyA: undefined, keyB: undefined, names: ['', ''] };
+          lastValue = undefined;
+          lastName = '';
           triggerAnimation();
         }
         lastVisibility = isVisible;
       }
 
-      const headerText = `${metric.title} SO FAR`.toUpperCase();
+      const headerText = `${metric.title.toUpperCase()} SO FAR`;
+      
       if (headerText !== lastMetricTitle) {
         metricTitle.textContent = headerText;
         lastMetricTitle = headerText;
       }
 
-      const nameA = data.player_a_name || 'Player A';
-      const nameB = data.player_b_name || 'Player B';
+      const playerName = currentPlayer === 'b' 
+        ? (data.player_b_name || 'Player B')
+        : (data.player_a_name || 'Player A');
 
-      const valueA = parseNumeric(data[metric.keyA]);
-      const valueB = parseNumeric(data[metric.keyB]);
+      const valueKey = currentPlayer === 'b' ? metric.keyB : metric.keyA;
+      const value = parseNumeric(data[valueKey]);
 
-      if (lastValues.names[0] !== nameA) {
-        playerANameEl.textContent = nameA;
+      if (lastName !== playerName) {
+        playerNameEl.textContent = playerName;
+        lastName = playerName;
       }
 
-      if (lastValues.names[1] !== nameB) {
-        playerBNameEl.textContent = nameB;
+      if (lastValue !== value) {
+        animateNumber(playerValueEl, lastValue ?? 0, value);
+        lastValue = value;
       }
 
-      if (lastValues.keyA !== valueA) {
-        animateNumber(playerAValueEl, lastValues.keyA ?? 0, valueA);
-      }
-
-      if (lastValues.keyB !== valueB) {
-        animateNumber(playerBValueEl, lastValues.keyB ?? 0, valueB);
-      }
-
-      const changed =
-        lastValues.keyA !== valueA ||
-        lastValues.keyB !== valueB ||
-        lastValues.names[0] !== nameA ||
-        lastValues.names[1] !== nameB;
-
-      if (changed && lastVisibility !== false) {
+      if ((lastValue !== value || lastName !== playerName) && lastVisibility !== false) {
         triggerAnimation();
       }
 
-      playerAValueEl.textContent = Math.round(valueA);
-      playerBValueEl.textContent = Math.round(valueB);
-
-      lastValues = { keyA: valueA, keyB: valueB, names: [nameA, nameB] };
+      playerValueEl.textContent = Math.round(value);
     }
 
     function parseNumeric(value) {
